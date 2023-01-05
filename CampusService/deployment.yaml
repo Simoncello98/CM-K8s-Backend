@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: campusservice
+  labels:
+    app: campusservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: campusservice
+  template:
+    metadata:
+      labels:
+        app: campusservice
+    spec:
+      containers:
+      - name: campusservice
+        image: campusservice
