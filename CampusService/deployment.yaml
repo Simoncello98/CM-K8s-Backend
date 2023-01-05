@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: campusservice
+  name: cm-campusservice
   labels:
-    app: campusservice
+    app: cm
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: campusservice
+      app: cm
   template:
     metadata:
       labels:
-        app: campusservice
+        app: cm
     spec:
       containers:
-      - name: campusservice
-        image: campusservice
+      - name: cm-campusservice
+        image: scionticdx/campusservice
