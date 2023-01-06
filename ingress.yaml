@@ -15,10 +15,10 @@ spec:
             name: cm-campusservice
             port:
               number: 80
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: cm-campusservice
-            port:
-              number: 80
+      # - path: /
+      #   pathType: Prefix
+      #   backend:
+      #     service:
+      #       name: cm-campusservice
+      #       port:
+      #         number: 80
