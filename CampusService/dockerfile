@@ -1,9 +1,10 @@
 FROM node:12
 
 WORKDIR /usr/src/app
-COPY package*.json ./
-RUN npm i
-COPY . .
+# COPY ../package*.json .
+# RUN npm i
+COPY ../../ .
 
 EXPOSE 80
-CMD ["node", "dist/api.js"]
+CMD ["ls", "./"]
+#CMD ["node", "dist/CampusService/src/api.js"]
