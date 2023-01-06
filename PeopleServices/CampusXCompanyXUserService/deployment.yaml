@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cm-campusservice
+  name: cm-campusxcompanyxuserservice
   labels:
     app: cm
 spec:
@@ -15,5 +15,5 @@ spec:
         app: cm
     spec:
       containers:
-      - name: cm-campusservice
-        image: scionticdx/campusservice
+      - name: cm-campusxcompanyxuserservice
+        image: scionticdx/campusxcompanyxuserservice

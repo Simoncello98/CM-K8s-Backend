@@ -7,4 +7,4 @@ COPY . .
 
 EXPOSE 80
 
-CMD ["node", "dist/PeopleServices/CampusService/src/api.js"]
+CMD ["node", "dist/PeopleServices/CampusXCompanyXUserService/src/api.js"]
