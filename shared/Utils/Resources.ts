@@ -2,15 +2,17 @@
   Created by Simone Scionti
 */
 
+import { stage } from "../envConfigUtils";
+
 export class Resources {
  
-  static IA_TABLE = process.env.stage == 'test' ? "CMAuthorization-test" : "CMAuthorization";
-  static IP_TABLE = process.env.stage == 'test' ? "CMPeople-test" : "CMPeople";
-  static IM_TABLE = process.env.stage == 'test' ?  "CMMeal-test":"CMMeal";
-  static S3_BUCKET = process.env.stage == 'test' ? "cm-storage-bucket-test" : "cm-storage-bucket";
-  static USERPOOL_NAME = process.env.stage == 'test' ? "CM-UserPool-test" :"CM-UserPool";
-  static USERPOOL_COGNITO_NAME = process.env.stage == 'test' ? "CM-UserPool-Client-test" :"CM-UserPool-Client";
-  static USERPOOL_ID = process.env.stage == 'test' ? "eu-central-1_cUzvIpcuW" :"eu-central-1_cUzvIpcuW";
+  static IA_TABLE = stage == 'test' ? "CMAuthorization-test" : "CMAuthorization";
+  static IP_TABLE = stage == 'test' ? "CMPeople-test" : "CMPeople";
+  static IM_TABLE = stage == 'test' ?  "CMMeal-test":"CMMeal";
+  static S3_BUCKET = stage == 'test' ? "cm-storage-bucket-test" : "cm-storage-bucket";
+  static USERPOOL_NAME = stage == 'test' ? "CM-UserPool-test" :"CM-UserPool";
+  static USERPOOL_COGNITO_NAME = stage == 'test' ? "CM-UserPool-Client-test" :"CM-UserPool-Client";
+  static USERPOOL_ID = stage == 'test' ? "eu-central-1_cUzvIpcuW" :"eu-central-1_cUzvIpcuW";
   
   //default values
   static DefaultPasswordForNewUsers = "CMTemporaryPSW123";

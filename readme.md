@@ -26,7 +26,10 @@ kubectl describe ingress cm -n ingress-basic
 //create new deployment
 6. kubectl create -f deployment.yaml
 7. kubectl create -f service.yaml
-8. kubectl create -f ingress.yaml
+
+//ingress
+kubectl delete ing cm
+kubectl create -f ingress.yaml
 
 
 //port forwarding to test:

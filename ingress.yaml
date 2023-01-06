@@ -6,10 +6,9 @@ metadata:
     ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   rules:
-  - host: localhost
   - http:
       paths:
-      - path: /c/
+      - path: /Campus
         pathType: Prefix
         backend:
           service:

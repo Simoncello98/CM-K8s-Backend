@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cm-companyservice
+  labels:
+    app: cm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cm
+  template:
+    metadata:
+      labels:
+        app: cm
+    spec:
+      containers:
+      - name: cm-companyservice
+        image: scionticdx/companyservice

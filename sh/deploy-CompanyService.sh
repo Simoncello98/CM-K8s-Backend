@@ -9,5 +9,5 @@ unlink ../dockerfile #added cause docker file seems to not work with relative pa
 docker push scionticdx/campusservice:latest
 kubectl delete deployment cm-campusservice
 kubectl delete service cm-campusservice
-kubectl create -f ../PeopleServices/CampusService/deployment.yaml
-kubectl create -f ../PeopleServices/CampusService/service.yaml
+kubectl create -f ../CampusService/deployment.yaml
+kubectl create -f ../CampusService/service.yaml
