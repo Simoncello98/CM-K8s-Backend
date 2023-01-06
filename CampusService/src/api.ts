@@ -1,8 +1,15 @@
 import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
 const app = express();
 const port = 80;
 
-app.get('/', (req, res) => {
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
+
+app.get('/campus', (req, res) => {
+  console.log(req);
   res.send('Hello World!');
 });
 
