@@ -7,7 +7,7 @@
 */
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { Company } from "../../../../shared/Models/Company";
 import { deserialize } from "typescript-json-serializer";
@@ -16,7 +16,7 @@ import { DynamoDB } from "aws-sdk";
 import { CampusXCompanyServiceUtils } from "../Utils/CampusXCompanyServiceUtils";
 
 
-export const getCompanyParentCampuses: APIGatewayProxyHandler = async (event, _context) => {
+export async function getCompanyParentCampuses(event: Request, res: Response) : Promise<void> {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -24,7 +24,7 @@ export const getCompanyParentCampuses: APIGatewayProxyHandler = async (event, _c
   var requestedCompany: Company = deserialize(requestBody, Company);
 
   if (!requestedCompany.enoughInfoForReadOrDelete()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCompany.getReadAndDeleteExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCompany.getReadAndDeleteExpectedBody()));
   }
 
   //QUERY
@@ -34,8 +34,8 @@ export const getCompanyParentCampuses: APIGatewayProxyHandler = async (event, _c
 
   try {
     const data = await dynamo.query(params).promise();
-    return Utils.getUniqueInstance().getDataResponse(data.Items);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(data.Items));
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, params);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
   }
 };

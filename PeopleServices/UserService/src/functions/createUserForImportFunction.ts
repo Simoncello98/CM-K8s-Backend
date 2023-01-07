@@ -3,7 +3,7 @@
 */
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { User } from "../../../../shared/Models/User";
 import { deserialize } from "typescript-json-serializer";
@@ -13,7 +13,7 @@ import { CognitoGroupsName } from "../../../../shared/Utils/Enums/CognitoGroupsN
 import { ISRestResultCodes } from "../../../../shared/Utils/Enums/RestResultCodes";
 
 
-export const createUserForImport: APIGatewayProxyHandler = async (event, _context) => {
+export async function createUserForImport(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -22,7 +22,7 @@ export const createUserForImport: APIGatewayProxyHandler = async (event, _contex
   newUser.Email = newUser.Email.toLocaleLowerCase().replace(/\s/g, '');
 
   if (!newUser.enoughInfoForCreate()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newUser.getCreateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newUser.getCreateExpectedBody()));
   }
 
   //Validate
@@ -31,7 +31,7 @@ export const createUserForImport: APIGatewayProxyHandler = async (event, _contex
   }
   let errorValidate = UserServiceUtils.validateImportantAttributes(newUser.Email, newUser.SocialNumber);
   if (errorValidate != null) {
-    return Utils.getUniqueInstance().getErrorResponse(null, { Error: errorValidate });
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: errorValidate }));
   }
 
   let dynamo = new DynamoDB.DocumentClient();
@@ -41,7 +41,7 @@ export const createUserForImport: APIGatewayProxyHandler = async (event, _contex
 
   if (newUser.TelephoneNumber) {
     if (!newUser.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
-      return Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest)
+      res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
     }
   }
 
@@ -66,13 +66,13 @@ export const createUserForImport: APIGatewayProxyHandler = async (event, _contex
       ...cognitoAssociateGroupData,
       ...data
     }
-    return Utils.getUniqueInstance().getDataResponse(result);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(result));
   } catch (error) {
     let mergedParams = {
       ...cognitoCreateUserParams,
       ...cognitoAssociateGroupParams,
       ...params
     }
-    return Utils.getUniqueInstance().getErrorResponse(error, mergedParams);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, mergedParams));
   }
 };

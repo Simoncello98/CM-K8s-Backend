@@ -15,16 +15,17 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { CampusXCompany } from "../../../../shared/Models/RelationshipsRecordModels/CampusXCompany";
 import { DynamoDB } from "aws-sdk";
 import { CampusXCompanyServiceUtils } from "../Utils/CampusXCompanyServiceUtils";
 import { EntityStatus } from "../../../../shared/Utils/Statics/EntityStatus";
+import { Request, Response } from "express";
 
 
-export const createCampusXCompany: APIGatewayProxyHandler = async (event, _context) => {
+export async function createCampusXCompany(event: Request, res: Response) : Promise<void> {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -32,7 +33,7 @@ export const createCampusXCompany: APIGatewayProxyHandler = async (event, _conte
   let newCampusXCompany: CampusXCompany = deserialize(requestBody, CampusXCompany);
 
   if (!newCampusXCompany.enoughInfoForCreate()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newCampusXCompany.getCreateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newCampusXCompany.getCreateExpectedBody()));
   }
 
   let dynamo = new DynamoDB.DocumentClient();
@@ -46,7 +47,7 @@ export const createCampusXCompany: APIGatewayProxyHandler = async (event, _conte
       flagDeleted = rel.RelationshipStatus === EntityStatus.DELETED;
     }
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, paramsGetRelationship);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, paramsGetRelationship));
   }
 
   //PUT
@@ -57,8 +58,8 @@ export const createCampusXCompany: APIGatewayProxyHandler = async (event, _conte
 
   try {
     const data = await dynamo.put(params).promise();
-    return Utils.getUniqueInstance().getDataResponse(data);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, params);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
   }
 };

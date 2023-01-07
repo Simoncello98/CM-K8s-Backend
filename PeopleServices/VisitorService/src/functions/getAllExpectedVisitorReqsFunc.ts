@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { CognitoIdentityServiceProvider, DynamoDB } from "aws-sdk";
 import { deserialize } from "typescript-json-serializer";
@@ -15,7 +15,7 @@ import { CampusXVisitorRequestStatus } from "../../../../shared/Models/QueryMode
 import "../../../../shared/Extensions/DynamoDBClientExtension";
 
 
-export const getAllExpectedVisitorReqs: APIGatewayProxyHandler = async (event, _context) => {
+export async function getAllExpectedVisitorReqs(event: Request, res: Response) : Promise<void>  {
 
     const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -23,7 +23,7 @@ export const getAllExpectedVisitorReqs: APIGatewayProxyHandler = async (event, _
     let requestVisitors: CampusXVisitorRequestStatus = deserialize(requestBody, CampusXVisitorRequestStatus);
 
     if (!requestVisitors.enoughInfoForReadOrDelete()) {
-        return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody()));
     }
 
     requestVisitors.autoFillUndefinedImportantAttributes();
@@ -65,13 +65,13 @@ export const getAllExpectedVisitorReqs: APIGatewayProxyHandler = async (event, _
                 listVisitorRequests.push(dataOtherRequests[i]);
             }
         }
-        return Utils.getUniqueInstance().getDataResponse(listVisitorRequests);
+        res.status(200).send(Utils.getUniqueInstance().getDataResponse(listVisitorRequests));
     } catch (error) {
         let mergedParams = {
             ...paramsForOtherVisitorRequests,
             ...paramsMyVisitorRequests
         }
-        return Utils.getUniqueInstance().getErrorResponse(error, mergedParams);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, mergedParams));
     }
 
 };

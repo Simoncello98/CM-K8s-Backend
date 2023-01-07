@@ -4,6 +4,7 @@ metadata:
   name: cm
   annotations:
     ingress.kubernetes.io/ssl-redirect: "false"
+    # traefik.ingress.kubernetes.io/router.entrypoints: websecure
 spec:
   rules:
   - http:

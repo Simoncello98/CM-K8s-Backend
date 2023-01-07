@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { VisitorRequest } from "../../../../shared/Models/VisitorRequest";
 import { deserialize } from "typescript-json-serializer";
@@ -16,14 +16,14 @@ import { ISRestResultCodes } from "../../../../shared/Utils/Enums/RestResultCode
 
 
 
-export const createVisitorRequest: APIGatewayProxyHandler = async (event, _context) => {
+export async function createVisitorRequest(event: Request, res: Response) : Promise<void>  {
     const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
     //Deserialize
     let newVisitorRequest: VisitorRequest = deserialize(requestBody, VisitorRequest);
 
     if (!newVisitorRequest.enoughInfoForCreate()) {
-        return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newVisitorRequest.getCreateExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newVisitorRequest.getCreateExpectedBody()));
     }
 
     let dynamo = new DynamoDB.DocumentClient();
@@ -47,13 +47,13 @@ export const createVisitorRequest: APIGatewayProxyHandler = async (event, _conte
 
     if (newVisitorRequest.UserHostTelephoneNumber) {
         if (!newVisitorRequest.UserHostTelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
-            return Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Userhost Thelephone number!" } }, ISRestResultCodes.BadRequest)
+            res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Userhost Thelephone number!" } }, ISRestResultCodes.BadRequest))
         }
     }
 
     if (newVisitorRequest.VisitorTelephoneNumber) {
         if (!newVisitorRequest.VisitorTelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
-            return Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Visitor Thelephone number!" } }, ISRestResultCodes.BadRequest)
+            res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Visitor Thelephone number!" } }, ISRestResultCodes.BadRequest))
         }
     }
 
@@ -62,9 +62,9 @@ export const createVisitorRequest: APIGatewayProxyHandler = async (event, _conte
 
     try {
         const data = await dynamo.put(params).promise();
-        return Utils.getUniqueInstance().getDataResponse(data);
+        res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
     } catch (error) {
-        return Utils.getUniqueInstance().getErrorResponse(error, params);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
     }
 };
 

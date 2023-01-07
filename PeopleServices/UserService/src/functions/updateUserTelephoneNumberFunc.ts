@@ -6,7 +6,7 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { User } from "../../../../shared/Models/User";
@@ -15,27 +15,27 @@ import { ISRestResultCodes } from "../../../../shared/Utils/Enums/RestResultCode
 import { UserServiceUtils } from "../Utils/UserServiceUtils";
 
 
-export const updateUserTelephoneNumber: APIGatewayProxyHandler = async (event, _context) => {
+export async function updateUserTelephoneNumber(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
   //Deserialize
   let requestedUser: User = deserialize(requestBody, User);
   if (!requestedUser.isPKDefined()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUser.getUpdateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUser.getUpdateExpectedBody()));
   }
 
   if (!requestedUser.enoughInfoForUpdate()) {
-    return Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, requestedUser.getUpdateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, requestedUser.getUpdateExpectedBody()));
   }
 
   if (!requestedUser.TelephoneNumber) {
-    return Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, requestedUser.TelephoneNumber);
+    res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, requestedUser.TelephoneNumber));
   }
 
   if (requestedUser.TelephoneNumber) {
     if (!requestedUser.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
-      return Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest)
+      res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
     }
   }
 
@@ -63,9 +63,9 @@ export const updateUserTelephoneNumber: APIGatewayProxyHandler = async (event, _
 
   try {
     const data = await dynamo.update(params).promise();
-    return Utils.getUniqueInstance().getDataResponse(data);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, params);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
   }
 };
 

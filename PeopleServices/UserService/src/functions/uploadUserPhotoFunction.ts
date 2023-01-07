@@ -12,9 +12,10 @@ import { UserServiceUtils } from "../Utils/UserServiceUtils";
 import { User } from "../../../../shared/Models/User";
 import { CreatePhoto } from "../../../../shared/Models/Logo/CreatePhoto";
 import { deserialize } from "typescript-json-serializer";
+import { Request, Response } from "express";
 
 
-export const uploadUserPhoto = async (event, _context) => {
+export async function uploadUserPhoto(event: Request, res: Response) : Promise<void> {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event)
 
@@ -22,14 +23,14 @@ export const uploadUserPhoto = async (event, _context) => {
   let createPhoto: CreatePhoto = deserialize(requestBody, CreatePhoto)
 
   if (!createPhoto.enoughInfoForReadOrDelete()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, createPhoto.getReadAndDeleteExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, createPhoto.getReadAndDeleteExpectedBody()));
   }
 
   //Check ContentType
   let contentType = createPhoto.ContentType.substring(6);
   let errorContentType = Utils.getUniqueInstance().checkContentType(contentType);
   if (errorContentType != "") {
-    return Utils.getUniqueInstance().getErrorResponse(null, { Error: { contentType: contentType, message: errorContentType } });
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { contentType: contentType, message: errorContentType } }));
   }
 
   //Build the request for S3
@@ -83,12 +84,12 @@ export const uploadUserPhoto = async (event, _context) => {
     let response = {
       Url: url
     };
-    return Utils.getUniqueInstance().getDataResponse(response);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(response));
   } catch (error) {
     let response = {
       ...paramsPutS3,
       ...paramsUpdateUserPhoto
     }
-    return Utils.getUniqueInstance().getErrorResponse(error, response);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, response));
   }
 }

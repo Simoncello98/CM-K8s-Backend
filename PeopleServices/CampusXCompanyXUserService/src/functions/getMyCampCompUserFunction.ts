@@ -8,17 +8,17 @@
 */
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { EntityStatus } from "../../../../shared/Utils/Statics/EntityStatus";
 import { CognitoIdentityServiceProvider, DynamoDB } from "aws-sdk";
 import { Campus } from "../../../../shared/Models/Campus";
-import { CampusXCompanyXUserServiceUtils } from "./Utils/CampusXCompanyXUserServiceUtils";
+import { CampusXCompanyXUserServiceUtils } from "../Utils/CampusXCompanyXUserServiceUtils";
 import "../../../../shared/Extensions/DynamoDBClientExtension";
 
 
-export const getMyCampCompUser: APIGatewayProxyHandler = async (event, _context) => {
+export async function getMyCampCompUser(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -26,7 +26,7 @@ export const getMyCampCompUser: APIGatewayProxyHandler = async (event, _context)
   let requestedCampus: Campus = deserialize(requestBody, Campus);
 
   if (!requestedCampus.enoughInfoForReadOrDelete()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody()));
   }
 
   //GET - email from signature
@@ -40,8 +40,8 @@ export const getMyCampCompUser: APIGatewayProxyHandler = async (event, _context)
 
   try {
     const data = await dynamo.queryGetAll(params);
-    return Utils.getUniqueInstance().getDataResponse(data);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, params);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
   }
 };

@@ -9,7 +9,7 @@
 'use strict';
 
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { CampusXCompany } from "../../../../shared/Models/RelationshipsRecordModels/CampusXCompany";
@@ -17,7 +17,7 @@ import { DynamoDB } from "aws-sdk";
 import { CampusXCompanyServiceUtils } from "../Utils/CampusXCompanyServiceUtils";
 
 
-export const updateCampusXCompany: APIGatewayProxyHandler = async (event, _context) => {
+export async function updateCampusXCompany(event: Request, res: Response) : Promise<void> {
   
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
   
@@ -25,11 +25,11 @@ export const updateCampusXCompany: APIGatewayProxyHandler = async (event, _conte
   var campusXCompanyToUpdate: CampusXCompany = deserialize(requestBody, CampusXCompany);
   
   if (!campusXCompanyToUpdate.isPKDefined()) { //if not is PK defined
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, campusXCompanyToUpdate.getUpdateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, campusXCompanyToUpdate.getUpdateExpectedBody()));
   }
   
   if (!campusXCompanyToUpdate.enoughInfoForUpdate()) {
-    return Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, campusXCompanyToUpdate.getUpdateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, campusXCompanyToUpdate.getUpdateExpectedBody()));
   }
 
   //UPDATE
@@ -39,9 +39,9 @@ export const updateCampusXCompany: APIGatewayProxyHandler = async (event, _conte
 
   try {
     const data = await dynamo.update(params).promise();
-    return Utils.getUniqueInstance().getDataResponse(data);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, params);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
   }
 };
 

@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { CognitoIdentityServiceProvider, DynamoDB } from "aws-sdk";
 import { deserialize } from "typescript-json-serializer";
@@ -16,7 +16,7 @@ import { VisitorRequest } from "../../../../shared/Models/VisitorRequest";
 import "../../../../shared/Extensions/DynamoDBClientExtension";
 
 
-export const getAllMyCompVisReqs: APIGatewayProxyHandler = async (event, _context) => {
+export async function getAllMyCompVisReqs(event: Request, res: Response) : Promise<void>  {
 
     const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -24,7 +24,7 @@ export const getAllMyCompVisReqs: APIGatewayProxyHandler = async (event, _contex
     let requestVisitors: CampusXVisitorRequestStatus = deserialize(requestBody, CampusXVisitorRequestStatus);
 
     if (!requestVisitors.enoughInfoForReadOrDelete()) {
-        return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody());
     }
 
     requestVisitors.autoFillUndefinedImportantAttributes();
@@ -37,7 +37,7 @@ export const getAllMyCompVisReqs: APIGatewayProxyHandler = async (event, _contex
     let companyList = await Utils.getUniqueInstance().getMyListOfCompanies(email, requestVisitors.CampusName, dynamo);
 
     if (companyList.length === 0) {
-        return Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "No Auth!" } }, ISRestResultCodes.NoAuth);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "No Auth!" } }, ISRestResultCodes.NoAuth));
     }
 
     //QUERY
@@ -57,9 +57,9 @@ export const getAllMyCompVisReqs: APIGatewayProxyHandler = async (event, _contex
             }
         }).filter(z => (z != null));
 
-        return Utils.getUniqueInstance().getDataResponse(listItems);
+        res.status(200).send(Utils.getUniqueInstance().getDataResponse(listItems));
     } catch (error) {
-        return Utils.getUniqueInstance().getErrorResponse(error, params);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
     }
 
 };

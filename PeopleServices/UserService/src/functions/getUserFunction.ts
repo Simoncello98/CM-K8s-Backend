@@ -6,7 +6,7 @@
 */
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { User } from "../../../../shared/Models/User";
@@ -16,14 +16,14 @@ import { EntityStatus } from "../../../../shared/Utils/Statics/EntityStatus";
 import { ISRestResultCodes } from "../../../../shared/Utils/Enums/RestResultCodes";
 
 
-export const getUser: APIGatewayProxyHandler = async (event, _context) => {
+export async function getUser(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
   //Deserialize 
   let requestedUser: User = deserialize(requestBody, User);
   if (!requestedUser.enoughInfoForReadOrDelete()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUser.getReadAndDeleteExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUser.getReadAndDeleteExpectedBody()));
   }
 
   //GET
@@ -35,11 +35,11 @@ export const getUser: APIGatewayProxyHandler = async (event, _context) => {
     const data = await dynamo.get(params).promise();
 
     if (data.Item && data.Item.UserStatus == EntityStatus.ACTIVE) {
-      return Utils.getUniqueInstance().getDataResponse(data.Item);
+      res.status(200).send(Utils.getUniqueInstance().getDataResponse(data.Item));
     } else {
-      return Utils.getUniqueInstance().getErrorResponse(null, {Error: { message: "User deleted." } }, ISRestResultCodes.NotFound);
+      res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, {Error: { message: "User deleted." } }, ISRestResultCodes.NotFound));
     }
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, params);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
   }
 };

@@ -13,15 +13,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
-app.get('/', (_req, res) => {
+app.get('/Campus', (_req, res) => {
   res.send("Hello from Campus")
 });
 
-app.post('/', (req, res) => {
+app.post('/Campus', (req, res) => {
   createCampus(req,res);
 });
 
-app.get('/All', (req, res) => {
+app.get('/Campus/All', (req, res) => {
   getAllCampuses(req,res);
 });
 

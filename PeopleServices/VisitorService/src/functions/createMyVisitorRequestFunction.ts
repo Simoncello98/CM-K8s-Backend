@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { MyVisitorRequest } from "../../../../shared/Models/MyVisitorRequest";
 import { deserialize } from "typescript-json-serializer";
@@ -18,21 +18,21 @@ import { User } from "../../../../shared/Models/User";
 import { ISRestResultCodes } from "../../../../shared/Utils/Enums/RestResultCodes";
 
 
-export const createMyVisitorRequest: APIGatewayProxyHandler = async (event, _context) => {
+export async function createMyVisitorRequest(event: Request, res: Response) : Promise<void>  {
     const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
     //Deserialize VisitorRequest. 
     let newVisitorRequest: MyVisitorRequest = deserialize(requestBody, MyVisitorRequest);
 
     if (!newVisitorRequest.enoughInfoForCreate()) {
-        return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newVisitorRequest.getCreateExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newVisitorRequest.getCreateExpectedBody()));
     }
 
 
     //New Specification: employee can create visitor request also for today. 
     // let today = Utils.getUniqueInstance().getCurrentDateTime().substr(0, StartDateEnum.Today);
     // if (newVisitorRequest.EstimatedDateOfArrival.substr(0, StartDateEnum.Today) === today) {
-    //     return Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "You can't create visit requests with today's date." } }, ISRestResultCodes.BadRequest);
+    //     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "You can't create visit requests with today's date." } }, ISRestResultCodes.BadRequest);
     // }
 
     //Get Host
@@ -59,24 +59,24 @@ export const createMyVisitorRequest: APIGatewayProxyHandler = async (event, _con
         const data = await dynamo.get(paramsHost).promise();
         telephoneNumber = data.Item ? data.Item.TelephoneNumber : "";
     } catch (error) {
-        return Utils.getUniqueInstance().getErrorResponse(error, paramsHost);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, paramsHost));
     }
 
     if (telephoneNumber === "" && newVisitorRequest.UserHostTelephoneNumber) {
         if (!newVisitorRequest.UserHostTelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
-            return Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Userhost Thelephone number!" } }, ISRestResultCodes.BadRequest)
+            res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Userhost Thelephone number!" } }, ISRestResultCodes.BadRequest))
         } else {
             telephoneNumber = newVisitorRequest.UserHostTelephoneNumber;
         }
     }
 
     if (!telephoneNumber) {
-        return Utils.getUniqueInstance().getErrorResponse(null, { Error: { hostEmail: hostEmail, message: "TelephoneNumber is empty." } })
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { hostEmail: hostEmail, message: "TelephoneNumber is empty." } }))
     }
 
     if (newVisitorRequest.VisitorTelephoneNumber) {
         if (!newVisitorRequest.VisitorTelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
-            return Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Visitor Thelephone number!" } }, ISRestResultCodes.BadRequest)
+            res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Visitor Thelephone number!" } }, ISRestResultCodes.BadRequest))
         }
     }
 
@@ -101,8 +101,8 @@ export const createMyVisitorRequest: APIGatewayProxyHandler = async (event, _con
 
     try {
         const data = await dynamo.put(params).promise();
-        return Utils.getUniqueInstance().getDataResponse(data);
+        res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
     } catch (error) {
-        return Utils.getUniqueInstance().getErrorResponse(error, params);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
     }
 };

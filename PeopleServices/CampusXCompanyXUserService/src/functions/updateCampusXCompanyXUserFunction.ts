@@ -14,18 +14,18 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { CampusXCompanyXUser } from "../../../../shared/Models/RelationshipsRecordModels/CampusXCompanyXUser";
-import { CampusXCompanyXUserConsistentUpdateManager } from "./shared/CampusXCompanyXUserConsistentUpdateManager";
+import { CampusXCompanyXUserConsistentUpdateManager } from "../shared/CampusXCompanyXUserConsistentUpdateManager";
 import { DynamoDB } from "aws-sdk"
-import { CampusXCompanyXUserServiceUtils } from "./Utils/CampusXCompanyXUserServiceUtils";
+import { CampusXCompanyXUserServiceUtils } from "../Utils/CampusXCompanyXUserServiceUtils";
 
 let dynamo = new DynamoDB.DocumentClient();
 
 //TODO: if you update the record doesn't exist -> BUG
-export const updateCampusXCompanyXUser: APIGatewayProxyHandler = async (event, _context) => {
+export async function updateCampusXCompanyXUser(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -33,11 +33,11 @@ export const updateCampusXCompanyXUser: APIGatewayProxyHandler = async (event, _
   var campusXCompanyXUserToUpdate: CampusXCompanyXUser = deserialize(requestBody, CampusXCompanyXUser);
 
   if (!campusXCompanyXUserToUpdate.isPKDefined() || !campusXCompanyXUserToUpdate.validValues()) { //if not is PK defined or values are not ok, like for CampusRole a value that is not [Admin-Common]
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, campusXCompanyXUserToUpdate.getUpdateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, campusXCompanyXUserToUpdate.getUpdateExpectedBody()));
   }
 
   if (!campusXCompanyXUserToUpdate.enoughInfoForUpdate()) {
-    return Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, campusXCompanyXUserToUpdate.getUpdateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, campusXCompanyXUserToUpdate.getUpdateExpectedBody()));
   }
 
   //remove in case of wrong attribute passed from the client that can destroy db consistence. 
@@ -49,7 +49,7 @@ export const updateCampusXCompanyXUser: APIGatewayProxyHandler = async (event, _
   //if i need to update the only one attr that needs to update all the other recrds of the user
   if (campusXCompanyXUserToUpdate.CampusRole != undefined) data = await transactionUpdate(campusXCompanyXUserToUpdate);
   else data = await updateSingleRecord(campusXCompanyXUserToUpdate);
-  return Utils.getUniqueInstance().getDataResponse(data);
+  res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
 };
 
 

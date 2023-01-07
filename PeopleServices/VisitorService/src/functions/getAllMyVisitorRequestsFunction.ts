@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { CognitoIdentityServiceProvider, DynamoDB } from "aws-sdk";
 import { deserialize } from "typescript-json-serializer";
@@ -14,7 +14,7 @@ import { VisitorRequestUtils } from "../Utils/VisitorRequestUtils";
 import "../../../../shared/Extensions/DynamoDBClientExtension";
 
 
-export const getAllMyVisitorRequests: APIGatewayProxyHandler = async (event, _context) => {
+export async function getAllMyVisitorRequests(event: Request, res: Response) : Promise<void>  {
 
     const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -23,7 +23,7 @@ export const getAllMyVisitorRequests: APIGatewayProxyHandler = async (event, _co
     requestVisitors.autoFillUndefinedImportantAttributes();
 
     if (!requestVisitors.enoughInfoForReadOrDelete()) {
-        return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody()));
     }
 
     //Get Email
@@ -39,9 +39,9 @@ export const getAllMyVisitorRequests: APIGatewayProxyHandler = async (event, _co
 
     try {
         const data = await dynamo.queryGetAll(params);
-        return Utils.getUniqueInstance().getDataResponse(data);
+        res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
     } catch (error) {
-        return Utils.getUniqueInstance().getErrorResponse(error, params);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
     }
 
 };

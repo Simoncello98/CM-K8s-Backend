@@ -3,8 +3,7 @@
 */
 
 'use strict';
-
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { Campus } from "../../../../shared/Models/Campus";
 import { deserialize } from "typescript-json-serializer";
@@ -13,7 +12,7 @@ import { CampusXCompanyServiceUtils } from "../Utils/CampusXCompanyServiceUtils"
 import { EntityStatus } from "../../../../shared/Utils/Statics/EntityStatus";
 
 
-export const getMyCampusCompanies: APIGatewayProxyHandler = async (event, _context) => {
+export async function getMyCampusCompanies(event: Request, res: Response) : Promise<void> {
 
     const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -21,7 +20,7 @@ export const getMyCampusCompanies: APIGatewayProxyHandler = async (event, _conte
     var requestedCampus: Campus = deserialize(requestBody, Campus);
 
     if (!requestedCampus.enoughInfoForReadOrDelete()) {
-        return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody()));
     }
 
     //Get email CompanyAdmin
@@ -47,8 +46,8 @@ export const getMyCampusCompanies: APIGatewayProxyHandler = async (event, _conte
                 }
             }
         }
-        return Utils.getUniqueInstance().getDataResponse(listOfRels);
+        res.status(200).send(Utils.getUniqueInstance().getDataResponse(listOfRels));
     } catch (error) {
-        return Utils.getUniqueInstance().getErrorResponse(error, params);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
     }
 };

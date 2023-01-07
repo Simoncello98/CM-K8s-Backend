@@ -13,19 +13,19 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { CampusXCompanyXUser } from "../../../../shared/Models/RelationshipsRecordModels/CampusXCompanyXUser";
 import { User } from "../../../../shared/Models/User";
 import { DynamoDB } from "aws-sdk";
-import { CampusXCompanyXUserServiceUtils } from "./Utils/CampusXCompanyXUserServiceUtils";
+import { CampusXCompanyXUserServiceUtils } from "../Utils/CampusXCompanyXUserServiceUtils";
 import { UserServiceUtils } from "../../../UserService/src/Utils/UserServiceUtils";
 import { EntityStatus } from "../../../../shared/Utils/Statics/EntityStatus";
 
 let dynamo = new DynamoDB.DocumentClient();
 
-export const createCampusXCompanyXUser: APIGatewayProxyHandler = async (event, _context) => {
+export async function createCampusXCompanyXUser(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -33,14 +33,14 @@ export const createCampusXCompanyXUser: APIGatewayProxyHandler = async (event, _
   let newCampusXCompanyXUser: CampusXCompanyXUser = deserialize(requestBody, CampusXCompanyXUser);
 
   if (!newCampusXCompanyXUser.enoughInfoForCreate()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newCampusXCompanyXUser.getCreateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newCampusXCompanyXUser.getCreateExpectedBody()));
   }
 
   if (newCampusXCompanyXUser.UserSerialID) {
     if (newCampusXCompanyXUser.UserSerialID.length > 7) {
       newCampusXCompanyXUser.UserSerialID = newCampusXCompanyXUser.UserSerialID.substring(newCampusXCompanyXUser.UserSerialID.length - 7);
     } else if (newCampusXCompanyXUser.UserSerialID.length < 7) {
-      return Utils.getUniqueInstance().getErrorResponse(null, { Error : { Message: "UserSerial ID must have 7 characters" }});
+      res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error : { Message: "UserSerial ID must have 7 characters" }}));
     }
   }
 
@@ -70,7 +70,7 @@ export const createCampusXCompanyXUser: APIGatewayProxyHandler = async (event, _
         newCampusXCompanyXUser.IsVisitor = userWithInfo.IsVisitor;
       }
     } catch (error) {
-      return Utils.getUniqueInstance().getErrorResponse(error, { Error: { message: "User does not exist." } });
+      res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, { Error: { message: "User does not exist." } }));
     }
   }
 
@@ -79,9 +79,9 @@ export const createCampusXCompanyXUser: APIGatewayProxyHandler = async (event, _
 
   try {
     const data = await dynamo.put(params).promise();
-    return Utils.getUniqueInstance().getDataResponse(data);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, params);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
   }
 };
 

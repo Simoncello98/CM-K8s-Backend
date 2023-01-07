@@ -6,24 +6,25 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { UserConsistentUpdateManager } from "../shared/UserConsistentUpdateManagerClass";
 import { EntityStatus } from "../../../../shared/Utils/Statics/EntityStatus";
 import { User } from "../../../../shared/Models/User";
 import { CognitoIdentityServiceProvider } from "aws-sdk";
-import { AuthorizationServiceUtils } from "../../../Authorization/AuthorizationService/Utils/AuthorizationServiceUtils";
+import { AuthorizationServiceUtils } from "../../../../Authorization/AuthorizationService/src/Utils/AuthorizationServiceUtils";
 
 
-export const setUserAsDeleted: APIGatewayProxyHandler = async (event, _context) => {
+
+export async function setUserAsDeleted(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
   //Deserialize 
   let requestedUser: User = deserialize(requestBody, User);
   if (!requestedUser.isPKDefined()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUser.getReadAndDeleteExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUser.getReadAndDeleteExpectedBody()));
   }
 
   //TODO: remove all other attributes passed from the client. for the update. THIS IS NOT AN UPDATE OPERATION.
@@ -44,5 +45,5 @@ export const setUserAsDeleted: APIGatewayProxyHandler = async (event, _context) 
   let paramsCognitoIdentityGetUser = AuthorizationServiceUtils.getCognitoParamsByUser(requestedUser.Email);
   await cognito.adminDisableUser(paramsCognitoIdentityGetUser).promise();
 
-  return Utils.getUniqueInstance().getDataResponse(data);
+  res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
 };

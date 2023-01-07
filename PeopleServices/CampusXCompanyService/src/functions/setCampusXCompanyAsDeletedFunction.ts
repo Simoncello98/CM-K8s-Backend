@@ -8,7 +8,7 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { CampusXCompany } from "../../../../shared/Models/RelationshipsRecordModels/CampusXCompany";
@@ -16,7 +16,7 @@ import { EntityStatus } from "../../../../shared/Utils/Statics/EntityStatus";
 import { CampusXCompanyConsistentUpdateManager } from "../shared/CampusXCompanyConsistentUpdateManager";
 
 
-export const setCampusXCompanyAsDeleted: APIGatewayProxyHandler = async (event, _context) => {
+export async function setCampusXCompanyAsDeleted(event: Request, res: Response) : Promise<void> {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -24,7 +24,7 @@ export const setCampusXCompanyAsDeleted: APIGatewayProxyHandler = async (event, 
   var campusXCompanyToUpdate: CampusXCompany = deserialize(requestBody, CampusXCompany);
 
   if (!campusXCompanyToUpdate.isPKDefined()) { //if not is PK defined
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, campusXCompanyToUpdate.getReadAndDeleteExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, campusXCompanyToUpdate.getReadAndDeleteExpectedBody()));
   }
 
   campusXCompanyToUpdate.RelationshipStatus = EntityStatus.DELETED;
@@ -43,6 +43,6 @@ export const setCampusXCompanyAsDeleted: APIGatewayProxyHandler = async (event, 
   let updateObjects = CampusXCompanyConsistentUpdateManager.getUniqueInstance().getUpdateObjects(rels, campusXCompanyToUpdate, updateSchema);
   let data = await CampusXCompanyConsistentUpdateManager.getUniqueInstance().transactUpdateRels(updateObjects);
 
-  return Utils.getUniqueInstance().getDataResponse(data);
+  res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
 };
 

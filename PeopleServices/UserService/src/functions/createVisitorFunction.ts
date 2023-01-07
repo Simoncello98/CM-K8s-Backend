@@ -3,22 +3,23 @@
 */
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { DynamoDB, CognitoIdentityServiceProvider } from "aws-sdk";
 import { UserServiceUtils } from "../Utils/UserServiceUtils";
-import { CampusXCompanyXUserServiceUtils } from "../../CampusXCompanyXUserService/src/functions/Utils/CampusXCompanyXUserServiceUtils";
+import { CampusXCompanyXUserServiceUtils } from "../../../CampusXCompanyXUserService/src/Utils/CampusXCompanyXUserServiceUtils";
 import { CognitoGroupsName } from "../../../../shared/Utils/Enums/CognitoGroupsName";
 import { EntityStatus } from "../../../../shared/Utils/Statics/EntityStatus";
 import { CampusXCompanyXVisitor } from "../../../../shared/Models/RelationshipsRecordModels/CampusXCompanyXVisitor";
 import { Visitor } from "../../../../shared/Models/Visitor";
-import { AuthorizationServiceUtils } from "../../../Authorization/AuthorizationService/Utils/AuthorizationServiceUtils";
+
 import { ISRestResultCodes } from "../../../../shared/Utils/Enums/RestResultCodes";
 import { Resources } from "../../../../shared/Utils/Resources";
+import { AuthorizationServiceUtils } from "../../../../Authorization/AuthorizationService/src/Utils/AuthorizationServiceUtils";
 
 
-export const createVisitor: APIGatewayProxyHandler = async (event, _context) => {
+export async function createVisitor(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -32,7 +33,7 @@ export const createVisitor: APIGatewayProxyHandler = async (event, _context) => 
    
 
   if (!newVisitor.enoughInfoForCreate()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newVisitor.getCreateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newVisitor.getCreateExpectedBody()));
   }
 
   //Validate
@@ -53,7 +54,7 @@ export const createVisitor: APIGatewayProxyHandler = async (event, _context) => 
   } else {
     let error = newVisitor.autoFillEmailWithStandardDomain();
     if (error) {
-      return Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "An error occurred when try to fill standard email." } }, ISRestResultCodes.BadRequest);
+      res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "An error occurred when try to fill standard email." } }, ISRestResultCodes.BadRequest));
     }
     temporaryPasswordFilled = Resources.DefaultPasswordForNewUsers;
     paramsForCreateUserInCognito = UserServiceUtils.getCognitoParamsWithoutSendingTheEmail(newVisitor.Email, temporaryPasswordFilled);
@@ -61,13 +62,13 @@ export const createVisitor: APIGatewayProxyHandler = async (event, _context) => 
 
   let errorValidate = UserServiceUtils.validateImportantAttributes(newVisitor.Email, newVisitor.SocialNumber);
   if (errorValidate != null) {
-    return Utils.getUniqueInstance().getErrorResponse(null, { Error: errorValidate });
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: errorValidate }));
   }
 
   newRelationship.Email = newVisitor.Email;
 
   if (!newRelationship.enoughInfoForCreate()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newRelationship.getCreateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newRelationship.getCreateExpectedBody()));
   }
 
   let dynamo = new DynamoDB.DocumentClient();
@@ -85,14 +86,14 @@ export const createVisitor: APIGatewayProxyHandler = async (event, _context) => 
       flagDeleted = dataDisabledUser.Item.UserStatus === EntityStatus.DELETED;
     }
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, { paramsDisabledUser: paramsDisabledUser });
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, { paramsDisabledUser: paramsDisabledUser }));
   }
 
   newVisitor.autoFillUndefinedImportantAttributesForVisitors();
 
   if (newVisitor.TelephoneNumber) {
     if (!newVisitor.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
-      return Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest)
+      res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
     }
   }
 
@@ -122,7 +123,7 @@ export const createVisitor: APIGatewayProxyHandler = async (event, _context) => 
       Password: temporaryPasswordFilled, // returns default temporary password if necessary else empty string
       ...dataRelationship
     }
-    return Utils.getUniqueInstance().getDataResponse(result);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(result));
   } catch (error) {
     let mergedParams = {
       ...paramsForCreateUserInCognito,
@@ -130,6 +131,6 @@ export const createVisitor: APIGatewayProxyHandler = async (event, _context) => 
       ...params,
       ...paramsRelationship
     }
-    return Utils.getUniqueInstance().getErrorResponse(error, mergedParams);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, mergedParams));
   }
 };

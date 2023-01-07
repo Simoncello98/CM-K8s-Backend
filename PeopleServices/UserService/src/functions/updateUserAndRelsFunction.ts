@@ -6,25 +6,25 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { User } from "../../../../shared/Models/User";
 import { UserConsistentUpdateManager } from "../shared/UserConsistentUpdateManagerClass";
 import { CognitoIdentityServiceProvider, DynamoDB } from "aws-sdk";
 import { UserServiceUtils } from "../Utils/UserServiceUtils";
-import { AuthorizationServiceUtils } from "../../../Authorization/AuthorizationService/Utils/AuthorizationServiceUtils";
 import { ISRestResultCodes } from "../../../../shared/Utils/Enums/RestResultCodes";
+import { AuthorizationServiceUtils } from "../../../../Authorization/AuthorizationService/src/Utils/AuthorizationServiceUtils";
 
 
-export const updateUserAndRels: APIGatewayProxyHandler = async (event, _context) => {
+export async function updateUserAndRels(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
   //Deserialize 
   let userData: User = deserialize(requestBody, User);
   if (!userData.isPKDefined()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, userData.getUpdateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, userData.getUpdateExpectedBody()));
   }
 
   //Update params
@@ -43,7 +43,7 @@ export const updateUserAndRels: APIGatewayProxyHandler = async (event, _context)
         try {
           await cognito.adminRemoveUserFromGroup(paramsRemoveUserFromGroup).promise();
         } catch (error) {
-          return Utils.getUniqueInstance().getErrorResponse(error, paramsRemoveUserFromGroup);
+          res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, paramsRemoveUserFromGroup));
         }
       }
 
@@ -51,22 +51,22 @@ export const updateUserAndRels: APIGatewayProxyHandler = async (event, _context)
       try {
         await cognito.adminAddUserToGroup(paramsAddUserToGroup).promise();
       } catch (error) {
-        return Utils.getUniqueInstance().getErrorResponse(error, paramsAddUserToGroup);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, paramsAddUserToGroup));
       }
 
     } catch (error) {
-      return Utils.getUniqueInstance().getErrorResponse(error, params);
+      res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
     }
   }
 
   //UPDATE
   if (!userData.enoughInfoForUpdate()) {
-    return Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, userData.getUpdateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, userData.getUpdateExpectedBody()));
   }
 
   if (userData.TelephoneNumber) {
     if (!userData.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
-      return Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest)
+      res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
     }
   }
 
@@ -75,6 +75,6 @@ export const updateUserAndRels: APIGatewayProxyHandler = async (event, _context)
   //NB. IF YOU WANT TO CHANGE THE USERSTATUS IN A CONSISTENCE WAY, YOU NEED TO SPECIFY THE UPDATESCHEMA PARAMETER.
   let updateObjects = UserConsistentUpdateManager.getUniqueInstance().getUpdateObjects(rels, userData, false);
   let data = await UserConsistentUpdateManager.getUniqueInstance().transactUpdateRels(updateObjects);
-  return Utils.getUniqueInstance().getDataResponse(data);
+  res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
 };
 

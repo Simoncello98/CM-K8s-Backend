@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { DynamoDB } from "aws-sdk";
 import { deserialize } from "typescript-json-serializer";
@@ -13,7 +13,7 @@ import { VisitorRequestUtils } from "../Utils/VisitorRequestUtils";
 import "../../../../shared/Extensions/DynamoDBClientExtension";
 
 
-export const getAllVisitorRequest: APIGatewayProxyHandler = async (event, _context) => {
+export async function getAllVisitorRequest(event: Request, res: Response) : Promise<void>  {
 
     const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -21,7 +21,7 @@ export const getAllVisitorRequest: APIGatewayProxyHandler = async (event, _conte
     let requestedCampus: Campus = deserialize(requestBody, Campus);
 
     if (!requestedCampus.enoughInfoForReadOrDelete()) {
-        return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody()));
     }
 
     //QUERY
@@ -31,9 +31,9 @@ export const getAllVisitorRequest: APIGatewayProxyHandler = async (event, _conte
 
     try {
         const data = await dynamo.queryGetAll(params);
-        return Utils.getUniqueInstance().getDataResponse(data);
+        res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
     } catch (error) {
-        return Utils.getUniqueInstance().getErrorResponse(error, params);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
     }
 };
 

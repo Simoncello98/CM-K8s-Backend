@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { VisitorRequest } from "../../../../shared/Models/VisitorRequest";
@@ -13,7 +13,7 @@ import { VisitorRequestUtils } from "../Utils/VisitorRequestUtils";
 import { VisitorRequestStatus } from "../../../../shared/Utils/Enums/VisitorRequestStatus";
 
 
-export const updateVisitorRequest: APIGatewayProxyHandler = async (event, _context) => {
+export async function updateVisitorRequest(event: Request, res: Response) : Promise<void>  {
 
     const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -21,11 +21,11 @@ export const updateVisitorRequest: APIGatewayProxyHandler = async (event, _conte
     let visitorRequestToUpdate: VisitorRequest = deserialize(requestBody, VisitorRequest);
 
     if (!visitorRequestToUpdate.isPKDefined()) { //if not is PK defined
-        return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, visitorRequestToUpdate.getUpdateExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, visitorRequestToUpdate.getUpdateExpectedBody()));
     }
 
     if (!visitorRequestToUpdate.enoughInfoForUpdate()) {
-        return Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, visitorRequestToUpdate.getUpdateExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, visitorRequestToUpdate.getUpdateExpectedBody()));
     }
 
     //UPDATE
@@ -42,9 +42,9 @@ export const updateVisitorRequest: APIGatewayProxyHandler = async (event, _conte
 
     try {
         const data = await dynamo.update(params).promise();
-        return Utils.getUniqueInstance().getDataResponse(data);
+        res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
     } catch (error) {
-        return Utils.getUniqueInstance().getErrorResponse(error, params);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
     }
 };
 

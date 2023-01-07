@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { VisitorRequest } from "../../../../shared/Models/VisitorRequest";
@@ -13,7 +13,7 @@ import { VisitorRequestUtils } from "../Utils/VisitorRequestUtils";
 import { ISRestResultCodes } from "../../../../shared/Utils/Enums/RestResultCodes";
 
 
-export const expireMyVisitorRequest: APIGatewayProxyHandler = async (event, _context) => {
+export async function expireMyVisitorRequest(event: Request, res: Response) : Promise<void>  {
 
     const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -21,7 +21,7 @@ export const expireMyVisitorRequest: APIGatewayProxyHandler = async (event, _con
     let visitorRequestToDelete: VisitorRequest = deserialize(requestBody, VisitorRequest);
 
     if (!visitorRequestToDelete.isPKDefined()) { //if not is PK defined
-        return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, visitorRequestToDelete.getReadAndDeleteExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, visitorRequestToDelete.getReadAndDeleteExpectedBody()));
     }
 
     //Get Email
@@ -33,12 +33,12 @@ export const expireMyVisitorRequest: APIGatewayProxyHandler = async (event, _con
     let companyList = await Utils.getUniqueInstance().getMyListOfCompanies(email, visitorRequestToDelete.CampusName, dynamo);
     
     if (companyList.length === 0) {
-        return Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "No Auth!" } }, ISRestResultCodes.NoAuth);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "No Auth!" } }, ISRestResultCodes.NoAuth));
     }
 
     //DELETE
     if (!companyList.find(({CompanyName}) => CompanyName === visitorRequestToDelete.UserHostCompanyName)) {
-        return Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "You cannot expire this request!" } }, ISRestResultCodes.NoAuth);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "You cannot expire this request!" } }, ISRestResultCodes.NoAuth));
     }
 
     visitorRequestToDelete.expireVisitorRequest()
@@ -46,9 +46,9 @@ export const expireMyVisitorRequest: APIGatewayProxyHandler = async (event, _con
 
     try {
         const data = await dynamo.delete(params).promise();
-        return Utils.getUniqueInstance().getDataResponse(data.Attributes);
+        res.status(200).send(Utils.getUniqueInstance().getDataResponse(data.Attributes));
     } catch (error) {
-        return Utils.getUniqueInstance().getErrorResponse(error, params);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
     }
 };
 

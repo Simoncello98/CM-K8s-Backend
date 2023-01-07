@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { VisitorRequest } from "../../../../shared/Models/VisitorRequest";
@@ -12,7 +12,7 @@ import { DynamoDB } from "aws-sdk";
 import { VisitorRequestUtils } from "../Utils/VisitorRequestUtils";
 
 
-export const expireVisitorRequest: APIGatewayProxyHandler = async (event, _context) => {
+export async function expireVisitorRequest(event: Request, res: Response) : Promise<void>  {
 
     const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -20,7 +20,7 @@ export const expireVisitorRequest: APIGatewayProxyHandler = async (event, _conte
     let visitorRequestToUpdate: VisitorRequest = deserialize(requestBody, VisitorRequest);
 
     if (!visitorRequestToUpdate.isPKDefined()) { //if not is PK defined
-        return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, visitorRequestToUpdate.getReadAndDeleteExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, visitorRequestToUpdate.getReadAndDeleteExpectedBody()));
     }
 
     //DELETE
@@ -31,9 +31,9 @@ export const expireVisitorRequest: APIGatewayProxyHandler = async (event, _conte
 
     try {
         const data = await dynamo.delete(params).promise();
-        return Utils.getUniqueInstance().getDataResponse(data.Attributes);
+        res.status(200).send(Utils.getUniqueInstance().getDataResponse(data.Attributes));
     } catch (error) {
-        return Utils.getUniqueInstance().getErrorResponse(error, params);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
     }
 };
 

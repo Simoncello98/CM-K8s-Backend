@@ -6,16 +6,16 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { CampusXCompanyXUser } from "../../../../shared/Models/RelationshipsRecordModels/CampusXCompanyXUser";
 import { EntityStatus } from "../../../../shared/Utils/Statics/EntityStatus";
 import { DynamoDB } from "aws-sdk";
-import { CampusXCompanyXUserServiceUtils } from "./Utils/CampusXCompanyXUserServiceUtils";
+import { CampusXCompanyXUserServiceUtils } from "../Utils/CampusXCompanyXUserServiceUtils";
 
 
-export const setCampXCompXUsrAsDel: APIGatewayProxyHandler = async (event, _context) => {
+export async function setCampXCompXUsrAsDel(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -23,7 +23,7 @@ export const setCampXCompXUsrAsDel: APIGatewayProxyHandler = async (event, _cont
   var requestedCampusXCompanyXUser: CampusXCompanyXUser = deserialize(requestBody, CampusXCompanyXUser);
 
   if (!requestedCampusXCompanyXUser.isPKDefined()) { //if not is PK defined
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampusXCompanyXUser.getReadAndDeleteExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampusXCompanyXUser.getReadAndDeleteExpectedBody()));
   }
 
   //UPDATE
@@ -34,8 +34,8 @@ export const setCampXCompXUsrAsDel: APIGatewayProxyHandler = async (event, _cont
 
   try {
     const response = await dynamo.update(params).promise();
-    return Utils.getUniqueInstance().getDataResponse(response);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(response));
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, params);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
   }
 };

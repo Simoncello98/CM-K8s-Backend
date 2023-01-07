@@ -3,7 +3,7 @@
 */
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { User } from "../../../../shared/Models/User";
 import { deserialize } from "typescript-json-serializer";
@@ -11,12 +11,12 @@ import { DynamoDB, CognitoIdentityServiceProvider } from "aws-sdk";
 import { UserServiceUtils } from "../Utils/UserServiceUtils";
 import { EntityStatus } from "../../../../shared/Utils/Statics/EntityStatus";
 import { CognitoGroupsName } from "../../../../shared/Utils/Enums/CognitoGroupsName";
-import { AuthorizationServiceUtils } from "../../../Authorization/AuthorizationService/Utils/AuthorizationServiceUtils";
 import { ISRestResultCodes } from "../../../../shared/Utils/Enums/RestResultCodes";
 import { Resources } from "../../../../shared/Utils/Resources";
+import { AuthorizationServiceUtils } from "../../../../Authorization/AuthorizationService/src/Utils/AuthorizationServiceUtils";
 
 
-export const createUserWithGroup: APIGatewayProxyHandler = async (event, _context) => {
+export async function createUserWithGroup(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -25,7 +25,7 @@ export const createUserWithGroup: APIGatewayProxyHandler = async (event, _contex
   newUser.Email = newUser.Email.toLocaleLowerCase().replace(/\s/g, '');
 
   if (!newUser.enoughInfoForCreate()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newUser.getCreateExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newUser.getCreateExpectedBody()));
   }
 
   //Validate
@@ -47,7 +47,7 @@ export const createUserWithGroup: APIGatewayProxyHandler = async (event, _contex
   } else {
     let error = newUser.autoFillEmailWithStandardDomain();
     if (error) {
-      return Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "An error occurred when try to fill standard email." } }, ISRestResultCodes.BadRequest);
+      res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "An error occurred when try to fill standard email." } }, ISRestResultCodes.BadRequest));
     }
     temporaryPasswordFilled = Resources.DefaultPasswordForNewUsers;
     paramsForCreateUserInCognito = UserServiceUtils.getCognitoParamsWithoutSendingTheEmail(newUser.Email, temporaryPasswordFilled);
@@ -57,7 +57,7 @@ export const createUserWithGroup: APIGatewayProxyHandler = async (event, _contex
   
   let errorValidate = UserServiceUtils.validateImportantAttributes(newUser.Email, newUser.SocialNumber);
   if (errorValidate) {
-    return Utils.getUniqueInstance().getErrorResponse(null, { Error: errorValidate });
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: errorValidate }));
   }
 
   let dynamo = new DynamoDB.DocumentClient();
@@ -98,12 +98,12 @@ export const createUserWithGroup: APIGatewayProxyHandler = async (event, _contex
     // }
   
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, { paramsDisabledUser: paramsDeletedUser });
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, { paramsDisabledUser: paramsDeletedUser }));
   }
 
   if (newUser.TelephoneNumber) {
     if (!newUser.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
-      return Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest)
+      res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
     }
   }
 
@@ -112,7 +112,7 @@ export const createUserWithGroup: APIGatewayProxyHandler = async (event, _contex
     try {
       await cognito.adminRemoveUserFromGroup(paramsRemoveUserFromGroup).promise();
     } catch (error) {
-      return Utils.getUniqueInstance().getErrorResponse(null, {paramsRemovewUserFromGroup: paramsRemoveUserFromGroup, message: "Remove User from Group in Cognito encountered an error." });
+      res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, {paramsRemovewUserFromGroup: paramsRemoveUserFromGroup, message: "Remove User from Group in Cognito encountered an error." }));
     }
   }
 
@@ -139,13 +139,13 @@ export const createUserWithGroup: APIGatewayProxyHandler = async (event, _contex
       Email: newUser.Email,
       Password: temporaryPasswordFilled // returns default temporary password if necessary else empty string
     }
-    return Utils.getUniqueInstance().getDataResponse(result);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(result));
   } catch (error) {
     let mergedParams = {
       ...paramsForCreateUserInCognito,
       ...cognitoAssociateGroupParams,
       ...params
     }
-    return Utils.getUniqueInstance().getErrorResponse(error, mergedParams);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, mergedParams));
   }
 };

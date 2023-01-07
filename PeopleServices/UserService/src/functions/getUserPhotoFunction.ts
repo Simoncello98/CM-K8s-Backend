@@ -9,10 +9,10 @@ import { S3 } from 'aws-sdk';
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { Photo } from "../../../../shared/Models/Logo/Photo";
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 
 
-export const getUserPhoto: APIGatewayProxyHandler = async (event, _context) => {
+export async function getUserPhoto(event: Request, res: Response) : Promise<void>  {
 
     const requestBody = Utils.getUniqueInstance().validateRequestObject(event)
 
@@ -20,7 +20,7 @@ export const getUserPhoto: APIGatewayProxyHandler = async (event, _context) => {
     var requestPhoto: Photo = deserialize(requestBody, Photo)
 
     if (!requestPhoto.enoughInfoForReadOrDelete()) {
-        return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestPhoto.getReadAndDeleteExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestPhoto.getReadAndDeleteExpectedBody()));
     }
 
     //GetSignedurl
@@ -41,9 +41,9 @@ export const getUserPhoto: APIGatewayProxyHandler = async (event, _context) => {
             ContentType: data.ContentType,
             Buff: buff
         }
-        return Utils.getUniqueInstance().getDataResponse(response);
+        res.status(200).send(Utils.getUniqueInstance().getDataResponse(response));
     } catch (error) {
-        return Utils.getUniqueInstance().getErrorResponse(error, params);
+        res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
     }
 }
 

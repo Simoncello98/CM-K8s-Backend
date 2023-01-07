@@ -9,18 +9,18 @@
 */
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { Campus } from "../../../../shared/Models/Campus";
 import { EntityStatus } from "../../../../shared/Utils/Statics/EntityStatus";
 import { DynamoDB } from "aws-sdk";
-import { CampusXCompanyXUserServiceUtils } from "./Utils/CampusXCompanyXUserServiceUtils";
+import { CampusXCompanyXUserServiceUtils } from "../Utils/CampusXCompanyXUserServiceUtils";
 import "../../../../shared/Extensions/DynamoDBClientExtension";
 
 
 
-export const getCampusDeletedUsers: APIGatewayProxyHandler = async (event, _context) => {
+export async function getCampusDeletedUsers(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -28,7 +28,7 @@ export const getCampusDeletedUsers: APIGatewayProxyHandler = async (event, _cont
   var requestedCampus: Campus = deserialize(requestBody, Campus);
 
   if (!requestedCampus.enoughInfoForReadOrDelete()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody()));
   }
 
   //QUERY
@@ -38,8 +38,8 @@ export const getCampusDeletedUsers: APIGatewayProxyHandler = async (event, _cont
 
   try {
     const data = await dynamo.queryGetAll(params);
-    return Utils.getUniqueInstance().getDataResponse(data);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, params);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
   }
 };

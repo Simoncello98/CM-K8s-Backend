@@ -9,15 +9,15 @@
 
 'use strict';
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { Request, Response } from "express";
 import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { CampusXCompanyXUser } from "../../../../shared/Models/RelationshipsRecordModels/CampusXCompanyXUser";
 import { DynamoDB } from "aws-sdk";
-import { CampusXCompanyXUserServiceUtils } from "./Utils/CampusXCompanyXUserServiceUtils";
+import { CampusXCompanyXUserServiceUtils } from "../Utils/CampusXCompanyXUserServiceUtils";
 
 
-export const getCampusXCompanyXUser: APIGatewayProxyHandler = async (event, _context) => {
+export async function getCampusXCompanyXUser(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
@@ -25,7 +25,7 @@ export const getCampusXCompanyXUser: APIGatewayProxyHandler = async (event, _con
   let requestedCampusXCompanyXUser: CampusXCompanyXUser = deserialize(requestBody, CampusXCompanyXUser);
 
   if (!requestedCampusXCompanyXUser.enoughInfoForReadOrDelete()) {
-    return Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampusXCompanyXUser.getReadAndDeleteExpectedBody());
+    res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampusXCompanyXUser.getReadAndDeleteExpectedBody()));
   }
 
   //DELETE
@@ -35,8 +35,8 @@ export const getCampusXCompanyXUser: APIGatewayProxyHandler = async (event, _con
 
   try {
     const data = await dynamo.delete(params).promise();
-    return Utils.getUniqueInstance().getDataResponse(data.Attributes);
+    res.status(200).send(Utils.getUniqueInstance().getDataResponse(data.Attributes));
   } catch (error) {
-    return Utils.getUniqueInstance().getErrorResponse(error, params);
+    res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
   }
 };
