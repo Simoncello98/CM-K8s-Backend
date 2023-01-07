@@ -17,7 +17,7 @@ import { DynamoDB } from "aws-sdk";
 import { CampusXCompanyXUserServiceUtils } from "../Utils/CampusXCompanyXUserServiceUtils";
 
 
-export async function getCampusXCompanyXUser(event: Request, res: Response) : Promise<void>  {
+export async function deleteCampusXCompanyXUser(event: Request, res: Response) : Promise<void>  {
 
   const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 

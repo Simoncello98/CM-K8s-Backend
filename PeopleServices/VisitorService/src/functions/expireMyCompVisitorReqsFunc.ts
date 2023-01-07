@@ -13,7 +13,7 @@ import { VisitorRequestUtils } from "../Utils/VisitorRequestUtils";
 import { ISRestResultCodes } from "../../../../shared/Utils/Enums/RestResultCodes";
 
 
-export async function expireMyVisitorRequest(event: Request, res: Response) : Promise<void>  {
+export async function expireMyCompVisitorRequest(event: Request, res: Response) : Promise<void>  {
 
     const requestBody = Utils.getUniqueInstance().validateRequestObject(event);
 
