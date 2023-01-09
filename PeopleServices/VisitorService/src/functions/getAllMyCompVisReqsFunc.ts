@@ -24,7 +24,7 @@ export async function getAllMyCompVisReqs(event: Request, res: Response) : Promi
     let requestVisitors: CampusXVisitorRequestStatus = deserialize(requestBody, CampusXVisitorRequestStatus);
 
     if (!requestVisitors.enoughInfoForReadOrDelete()) {
-        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody());
+        res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody()));
     }
 
     requestVisitors.autoFillUndefinedImportantAttributes();
