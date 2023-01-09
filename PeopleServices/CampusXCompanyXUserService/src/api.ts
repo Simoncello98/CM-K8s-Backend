@@ -51,46 +51,46 @@ app.get('/CampusXCompanyXUser/CampusCompanyUsers', (req, res) => {
   getCampusCompanyUsers(req,res);
 });
 
-app.get('CampusXCompanyXUser/CampusCompanyDeletedUsers', (req, res) => {
+app.get('/CampusXCompanyXUser/CampusCompanyDeletedUsers', (req, res) => {
   getCampusCompanyDeletedUsers(req,res);
 });
 
-app.get('CampusXCompanyXUser/MyCampusCompanyUser', (req, res) => {
+app.get('/CampusXCompanyXUser/MyCampusCompanyUser', (req, res) => {
   getMyCampCompUser(req,res);
 });
 
-app.get('CampusXCompanyXUser/CampusUsers', (req, res) => {
+app.get('/CampusXCompanyXUser/CampusUsers', (req, res) => {
   getCampusUsers(req,res);
 });
 
-app.get('CampusXCompanyXUser/CampusVisitors', (req, res) => {
+app.get('/CampusXCompanyXUser/CampusVisitors', (req, res) => {
   getCampusVisitors(req,res);
 });
 
-app.get('CampusXCompanyXUser/CampusDeletedUsers', (req, res) => {
+app.get('/CampusXCompanyXUser/CampusDeletedUsers', (req, res) => {
   getCampusDeletedUsers(req,res);
 });
 
-app.get('CampusXCompanyXUser/CompanyUsers', (req, res) => {
+app.get('/CampusXCompanyXUser/CompanyUsers', (req, res) => {
   getCompanyUsers(req,res);
 });
 
-app.get('CampusXCompanyXUser/CompanyDeletedUsers', (req, res) => {
+app.get('/CampusXCompanyXUser/CompanyDeletedUsers', (req, res) => {
   getCompanyDeletedUsers(req,res);
 });
-app.get('CampusXCompanyXUser/UserParentCompaniesAndCampuses', (req, res) => {
+app.get('/CampusXCompanyXUser/UserParentCompaniesAndCampuses', (req, res) => {
   getUserParentCompsAndCamps(req,res);
 });
 
-app.get('CampusXCompanyXUser/UserDeletedParentCompaniesAndCampuses', (req, res) => {
+app.get('/CampusXCompanyXUser/UserDeletedParentCompaniesAndCampuses', (req, res) => {
   getUserDelParCompsCamps(req,res);
 });
 
-app.get('CampusXCompanyXUser/CountCompanyUsers', (req, res) => {
+app.get('/CampusXCompanyXUser/CountCompanyUsers', (req, res) => {
   getCountCompanyUsers(req,res);
 });
 
-app.get('CampusXCompanyXUser/MyCountCompanyUsers', (req, res) => {
+app.get('/CampusXCompanyXUser/MyCountCompanyUsers', (req, res) => {
   getMyCountCompanyUsers(req,res);
 });
 

@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: cm-userservice
   labels:
-    app: cm
+    app: cm-userservice
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cm
+      app: cm-userservice
   template:
     metadata:
       labels:
-        app: cm
+        app: cm-userservice
     spec:
       containers:
       - name: cm-userservice

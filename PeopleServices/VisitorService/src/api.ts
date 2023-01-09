@@ -56,39 +56,39 @@ app.post('/Visitor/MyRequest', (req, res) => {
 });
 
 //get methods
-app.get('Visitor/All', (req, res) => {
+app.get('/Visitor/All', (req, res) => {
   getAllVisitorRequest(req,res);
 });
 
-app.get('Visitor/ByVisitor', (req, res) => {
+app.get('/Visitor/ByVisitor', (req, res) => {
   getByVisitor(req,res);
 });
 
-app.get('Visitor/MyRequests', (req, res) => {
+app.get('/Visitor/MyRequests', (req, res) => {
   getAllMyVisitorRequests(req,res);
 });
 
-app.get('Visitor/MyCompanyRequests', (req, res) => {
+app.get('/Visitor/MyCompanyRequests', (req, res) => {
   getAllMyCompVisReqs(req,res);
 });
 
-app.get('Visitor/MyCompanyRequestsByStatus', (req, res) => {
+app.get('/Visitor/MyCompanyRequestsByStatus', (req, res) => {
   getAllMyCompVisReqsByStatus(req,res);
 });
 
-app.get('Visitor/Status', (req, res) => {
+app.get('/Visitor/Status', (req, res) => {
   getAllVisitorReqsByStatus(req,res);
 });
 
-app.get('Visitor/Host', (req, res) => {
+app.get('/Visitor/Host', (req, res) => {
   getAllVisitorReqsByHost(req,res);
 });
 
-app.get('Visitor/AllExpected', (req, res) => {
+app.get('/Visitor/AllExpected', (req, res) => {
   getAllExpectedVisitorReqs(req,res);
 });
 
-app.get('Visitor/AllExpectedForAnyStatus', (req, res) => {
+app.get('/Visitor/AllExpectedForAnyStatus', (req, res) => {
   getAdminAllExpVisitorReqs(req,res);
 });
 

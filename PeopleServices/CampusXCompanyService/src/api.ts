@@ -44,19 +44,19 @@ app.get('/CampusXCompany/CampusCompanies', (req, res) => {
   getCampusCompanies(req,res);
 });
 
-app.get('CampusXCompany/MyCampusCompanies', (req, res) => {
+app.get('/CampusXCompany/MyCampusCompanies', (req, res) => {
   getMyCampusCompanies(req,res);
 });
 
-app.get('CampusXCompany/CampusDeletedCompanies', (req, res) => {
+app.get('/CampusXCompany/CampusDeletedCompanies', (req, res) => {
   getCampusDeletedCompanies(req,res);
 });
 
-app.get('CampusXCompany/CompanyParentCampuses', (req, res) => {
+app.get('/CampusXCompany/CompanyParentCampuses', (req, res) => {
   getCompanyParentCampuses(req,res);
 });
 
-app.get('CampusXCompany/CompanyDeletedParentCampuses', (req, res) => {
+app.get('/CampusXCompany/CompanyDeletedParentCampuses', (req, res) => {
   getCompanyDelParentCamp(req,res);
 });
 

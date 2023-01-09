@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: cm-companyservice
   labels:
-    app: cm
+    app: cm-companyservice
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cm
+      app: cm-companyservice
   template:
     metadata:
       labels:
-        app: cm
+        app: cm-companyservice
     spec:
       containers:
       - name: cm-companyservice

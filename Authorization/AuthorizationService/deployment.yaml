@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: cm-authservice
   labels:
-    app: cm
+    app: cm-authservice
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cm
+      app: cm-authservice
   template:
     metadata:
       labels:
-        app: cm
+        app: cm-authservice
     spec:
       containers:
       - name: cm-authservice

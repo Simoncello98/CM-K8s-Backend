@@ -1,13 +1,13 @@
 npx tsc
-ln ../PeopleServices/CampusService/dockerfile ../dockerfile #added cause docker file seems to not work with relative path in parent folders
+ln ../PeopleServices/CompanyService/dockerfile ../dockerfile #added cause docker file seems to not work with relative path in parent folders
 
-docker image rm scionticdx/campusservice
-docker build -t scionticdx/campusservice ../. 
+docker image rm scionticdx/companyservice
+docker build -t scionticdx/companyservice ../. 
 
 unlink ../dockerfile #added cause docker file seems to not work with relative path in parent folders
 
-docker push scionticdx/campusservice:latest
-kubectl delete deployment cm-campusservice
-kubectl delete service cm-campusservice
-kubectl create -f ../PeopleServices/CampusService/deployment.yaml
-kubectl create -f ../PeopleServices/CampusService/service.yaml
+docker push scionticdx/companyservice:latest
+kubectl delete deployment cm-companyservice
+kubectl delete service cm-companyservice
+kubectl create -f ../PeopleServices/CompanyService/deployment.yaml
+kubectl create -f ../PeopleServices/CompanyService/service.yaml

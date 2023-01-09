@@ -42,22 +42,22 @@ app.post('/User/WithGroup', (req, res) => {
   createUserWithGroup(req,res);
 });
 
-app.post('User/Visitor', (req, res) => {
+app.post('/User/Visitor', (req, res) => {
   createVisitor(req,res);
 });
 
-app.put('User/TelephoneNumber', (req, res) => {
+app.put('/User/TelephoneNumber', (req, res) => {
   updateUserTelephoneNumber(req,res);
 });
-app.put('User/MyTelephoneNumber', (req, res) => {
+app.put('/User/MyTelephoneNumber', (req, res) => {
   updateMyTelephoneNumber(req,res);
 });
 
-app.put('User/MyCompanyUsers', (req, res) => {
+app.put('/User/MyCompanyUsers', (req, res) => {
   updateMyCompUsersAndRels(req,res);
 });
 
-app.post('User/Photo', (req, res) => {
+app.post('/User/Photo', (req, res) => {
   uploadUserPhoto(req,res);
 });
 

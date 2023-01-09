@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: cm-campusservice
   labels:
-    app: cm
+    app: cm-campusservice
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cm
+      app: cm-campusservice
   template:
     metadata:
       labels:
-        app: cm
+        app: cm-campusservice
     spec:
       containers:
       - name: cm-campusservice

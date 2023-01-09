@@ -3,12 +3,9 @@ kind: Service
 metadata:
   name: cm-campusxcompanyxuserservice
   labels:
-    app: cm
+    app: cm-campusxcompanyxuserservice
 spec:
-  type: ClusterIP
   ports:
   - port: 80
-    protocol: TCP
-    targetPort: 80
   selector:
-    app: cm
+    app: cm-campusxcompanyxuserservice

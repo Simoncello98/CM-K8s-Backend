@@ -3,12 +3,9 @@ kind: Service
 metadata:
   name: cm-visitorservice
   labels:
-    app: cm
+    app: cm-visitorservice
 spec:
-  type: ClusterIP
   ports:
   - port: 80
-    protocol: TCP
-    targetPort: 80
   selector:
-    app: cm
+    app: cm-visitorservice

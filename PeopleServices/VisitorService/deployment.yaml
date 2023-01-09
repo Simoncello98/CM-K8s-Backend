@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: cm-visitorservice
   labels:
-    app: cm
+    app: cm-visitorservice
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cm
+      app: cm-visitorservice
   template:
     metadata:
       labels:
-        app: cm
+        app: cm-visitorservice
     spec:
       containers:
       - name: cm-visitorservice

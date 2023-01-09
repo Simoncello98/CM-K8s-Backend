@@ -34,7 +34,7 @@ export class Utils {
             else response.body = data;
         }
         else response.statusCode = ISRestResultCodes.NotFound;
-        return response;
+        return response.body; //N.B -> ".body" was added cause express does not need any parameter to be read as response header. This was the easiest manner so.
     }
 
     /** Used to reply with an error message to the client */
@@ -49,7 +49,7 @@ export class Utils {
             Params: params,
             Trace: trace.stack
         };
-        return response;
+        return response.body; //N.B -> ".body" was added cause express does not need any parameter to be read as response header. This was the easiest manner so.
     }
 
     public getValidationErrorResponse(requestBody, expectedBody) {
@@ -60,7 +60,7 @@ export class Utils {
                 receivedRequestBody: requestBody
             }
         }
-        return this.getResponse(ISRestResultCodes.BadRequest, body);
+        return this.getResponse(ISRestResultCodes.BadRequest, body).body;//N.B -> ".body" was added cause express does not need any parameter to be read as response header. This was the easiest manner so.
     }
 
     public getNothingToDoErrorResponse(requestBody, expectedBody) {
@@ -72,7 +72,7 @@ export class Utils {
                 receivedRequestBody: requestBody
             }
         }
-        return this.getResponse(ISRestResultCodes.BadRequest, body);
+        return this.getResponse(ISRestResultCodes.BadRequest, body).body;//N.B -> ".body" was added cause express does not need any parameter to be read as response header. This was the easiest manner so.
     }
 
     private getResponse(statusCode: number, body: any): Response {
@@ -93,11 +93,9 @@ export class Utils {
     public validateRequestObject(event: Request): Object {
         if (!event) return {};
         let bodyString: string = "";
-        if (!event.body) { //lambda direct calls and step functions payload has no body and no queryStringParameters.
-            if (typeof event == "object") bodyString = JSON.stringify(event); //lambda direct call has object payload.
-            else return {}; //nothing received.
-        }
-        else if (event.body != undefined) bodyString = event.body;
+        if (event.query && Object.keys(event.query).length > 0) bodyString = JSON.stringify(event.query); //lambda direct call has object payload.
+        else if(event.params && Object.keys(event.params).length > 0) bodyString = JSON.stringify(event.params)
+        else if (event.body && Object.keys(event.body).length > 0) bodyString = JSON.stringify(event.body);
         //else if (event.queryStringParameters != undefined) bodyString = this.getObjectStringFromDictionary(event.queryStringParameters);
         let bodyRequest: Object;
         try {
