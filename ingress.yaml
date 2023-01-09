@@ -16,6 +16,13 @@ spec:
             name: cm-authservice
             port:
               number: 80
+      - path: /UserXGroup
+        pathType: Prefix
+        backend:
+          service:
+            name: cm-authservice
+            port:
+              number: 80
       - path: /Campus
         pathType: Prefix
         backend:

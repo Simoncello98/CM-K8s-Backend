@@ -51,3 +51,7 @@ kubectl exec --stdin --tty cm-campusservice-698cbcd58-57zn5 -- /bin/bash
 
 //get service endpoints 
 kubectl get endpoints <name>
+
+
+
+Admin123
