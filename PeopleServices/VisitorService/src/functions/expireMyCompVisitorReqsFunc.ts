@@ -29,7 +29,7 @@ export async function expireMyCompVisitorRequest(event: Request, res: Response) 
     let dynamo = new DynamoDB.DocumentClient();
     
     //GetSignature
-    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.requestContext.identity.cognitoAuthenticationProvider, cognito);
+    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
     let companyList = await Utils.getUniqueInstance().getMyListOfCompanies(email, visitorRequestToDelete.CampusName, dynamo);
     
     if (companyList.length === 0) {

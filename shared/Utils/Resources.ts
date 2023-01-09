@@ -13,6 +13,7 @@ export class Resources {
   static USERPOOL_NAME = stage == 'test' ? "CM-UserPool-test" :"CM-UserPool";
   static USERPOOL_COGNITO_NAME = stage == 'test' ? "CM-UserPool-Client-test" :"CM-UserPool-Client";
   static USERPOOL_ID = stage == 'test' ? "eu-central-1_cUzvIpcuW" :"eu-central-1_cUzvIpcuW";
+  static USERPOOL_CLIENTID = 'test' ? '2uqjafq2u1kf6f8mce741s0tcv' : '2uqjafq2u1kf6f8mce741s0tcv' //todo: specify for prod
   
   //default values
   static DefaultPasswordForNewUsers = "CMTemporaryPSW123";

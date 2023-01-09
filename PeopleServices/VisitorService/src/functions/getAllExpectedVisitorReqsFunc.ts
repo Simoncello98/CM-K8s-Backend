@@ -33,7 +33,7 @@ export async function getAllExpectedVisitorReqs(event: Request, res: Response) :
 
     //Get Email
     let cognito = new CognitoIdentityServiceProvider();
-    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.requestContext.identity.cognitoAuthenticationProvider, cognito);
+    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
 
     //QUERY Other VisitorRequests
     let paramsForOtherVisitorRequests = VisitorRequestUtils.paramsForQueryByCampusStatusStartDateAndLimitRecords(requestVisitors.CampusName, VisitorRequestStatus.ACCEPTED, startDate);

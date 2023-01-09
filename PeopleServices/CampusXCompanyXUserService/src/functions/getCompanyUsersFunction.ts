@@ -29,7 +29,7 @@ export async function getCompanyUsers(event: Request, res: Response) : Promise<v
 
   //GET - email from signature
   let cognito = new CognitoIdentityServiceProvider();
-  let email = await Utils.getUniqueInstance().getEmailFromSignature(event.requestContext.identity.cognitoAuthenticationProvider, cognito);
+  let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
 
   //GET - list of Companies
   let dynamo = new DynamoDB.DocumentClient();

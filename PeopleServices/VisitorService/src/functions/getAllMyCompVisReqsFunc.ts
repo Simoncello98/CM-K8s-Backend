@@ -33,7 +33,7 @@ export async function getAllMyCompVisReqs(event: Request, res: Response) : Promi
     let dynamo = new DynamoDB.DocumentClient();
 
     //GetSignature
-    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.requestContext.identity.cognitoAuthenticationProvider, cognito);
+    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
     let companyList = await Utils.getUniqueInstance().getMyListOfCompanies(email, requestVisitors.CampusName, dynamo);
 
     if (companyList.length === 0) {

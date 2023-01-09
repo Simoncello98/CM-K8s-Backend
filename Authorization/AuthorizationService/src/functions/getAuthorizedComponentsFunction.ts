@@ -16,7 +16,6 @@ export async function getAuthorizedComponents(event: Request, res: Response) : P
 
     let dynamo = new DynamoDB.DocumentClient();
     let cognito = new CognitoIdentityServiceProvider({ signatureVersion: 'v4' });
-    console.log(JSON.stringify(event))
     let groupName = await Utils.getUniqueInstance().getGroupFromSignature(event.headers.authorization, cognito);
     console.log("group: " + groupName);
 

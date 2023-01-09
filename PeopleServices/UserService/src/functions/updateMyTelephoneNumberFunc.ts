@@ -27,7 +27,7 @@ export async function updateMyTelephoneNumber(event: Request, res: Response) : P
 
   //GET - email from signature
   let cognito = new CognitoIdentityServiceProvider();
-  let email = await Utils.getUniqueInstance().getEmailFromSignature(event.requestContext.identity.cognitoAuthenticationProvider, cognito);
+  let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
   if (email.toLowerCase() !== requestedUser.Email.toLowerCase()) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { cognitoEmail: email, recivedEmail: requestedUser.Email, message: "You don't have permission to edit other users." }, ISRestResultCodes.NoAuth));
   }

@@ -25,7 +25,7 @@ export async function getMyCampusCompanies(event: Request, res: Response) : Prom
 
     //Get email CompanyAdmin
     let cognito = new CognitoIdentityServiceProvider();
-    let emailCompanyAdmin = await Utils.getUniqueInstance().getEmailFromSignature(event.requestContext.identity.cognitoAuthenticationProvider, cognito);
+    let emailCompanyAdmin = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
 
     //Get list of my companies
     let dynamo = new DynamoDB.DocumentClient();

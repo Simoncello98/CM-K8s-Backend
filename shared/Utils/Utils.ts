@@ -13,6 +13,7 @@ import { ISRestResultCodes } from "./Enums/RestResultCodes";
 import { Resources } from "./Resources";
 import { CognitoIdentityServiceProvider, DynamoDB, S3 } from "aws-sdk";
 import { EntityStatus } from "./Statics/EntityStatus";
+import { CognitoJwtVerifier } from "aws-jwt-verify";
 
 export class Utils {
     private static obj: Utils = null;
@@ -272,19 +273,31 @@ export class Utils {
         }
     }
 
-    public async getGroupFromSignature(cognitoAuthenticationProvider: string, cognito: CognitoIdentityServiceProvider): Promise<string> {
-        const sub = cognitoAuthenticationProvider.split(':')[2];
+    public async getGroupFromSignature(signature: string, cognito: CognitoIdentityServiceProvider): Promise<string> {
+        if(!signature){
+            console.error("Signature not found");
+            return "Signature not found";
+        }
+        let token = signature.split(",").filter(s => s.startsWith("Signature="))[0].replace("Signature=", "");
+        const verifier = CognitoJwtVerifier.create({
+            userPoolId: Resources.USERPOOL_ID,
+            tokenUse: "access",
+            clientId: Resources.USERPOOL_CLIENTID,
+          });
+
+        try {
+        const payload = await verifier.verify(token);
+        let sub = payload.sub
         const cognitoParams = {
             UserPoolId: Resources.USERPOOL_ID,
             Username: sub
         };
-        //Get Group
-        try {
-            let cognitoData = await cognito.adminListGroupsForUser(cognitoParams).promise();
+        let cognitoData = await cognito.adminListGroupsForUser(cognitoParams).promise();
             return cognitoData.Groups[0].GroupName;
-        } catch (error) {
+
+        } catch(error) {
             return "" + error;
-        }
+        }  
     }
 
     public async getMyListOfCompanies(companyEmailAdmin: string, campusName: string, dynamo: DynamoDB.DocumentClient): Promise<DynamoDB.DocumentClient.ItemList> {

@@ -31,7 +31,7 @@ export async function getMyCampCompUser(event: Request, res: Response) : Promise
 
   //GET - email from signature
   let cognito = new CognitoIdentityServiceProvider();
-  let email = await Utils.getUniqueInstance().getEmailFromSignature(event.requestContext.identity.cognitoAuthenticationProvider, cognito);
+  let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
 
   //QUERY
   let params = CampusXCompanyXUserServiceUtils.paramsForQueryByCampusAndEmailWithStatus(requestedCampus.CampusName, email, EntityStatus.ACTIVE);

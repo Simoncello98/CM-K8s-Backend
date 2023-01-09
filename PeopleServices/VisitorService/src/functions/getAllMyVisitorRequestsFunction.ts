@@ -28,7 +28,7 @@ export async function getAllMyVisitorRequests(event: Request, res: Response) : P
 
     //Get Email
     let cognito = new CognitoIdentityServiceProvider();
-    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.requestContext.identity.cognitoAuthenticationProvider, cognito);
+    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
 
     //QUERY
     let params = requestVisitors.VisitorRequestStatus != VisitorRequestStatus.ALL

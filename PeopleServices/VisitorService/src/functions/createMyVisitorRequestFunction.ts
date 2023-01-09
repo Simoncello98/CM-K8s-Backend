@@ -37,7 +37,7 @@ export async function createMyVisitorRequest(event: Request, res: Response) : Pr
 
     //Get Host
     let cognito = new CognitoIdentityServiceProvider();
-    let hostEmail = await Utils.getUniqueInstance().getEmailFromSignature(event.requestContext.identity.cognitoAuthenticationProvider, cognito);
+    let hostEmail = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
 
     //GET - TelephoneNumber
     const keysHost: DynamoDBKeySchemaInterface = {

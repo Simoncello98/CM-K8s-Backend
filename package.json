@@ -30,6 +30,7 @@
   "dependencies": {
     "@types/aws-sdk": "^2.7.0",
     "@types/uuid": "^8.3.0",
+    "aws-jwt-verify": "^3.2.0",
     "codice-fiscale-js": "^2.3.6",
     "cors": "^2.8.5",
     "dcc-utils": "0.0.1",

@@ -40,7 +40,7 @@ export async function updateMyCompUsersAndRels(event: Request, res: Response) : 
 
     //Get CompanyAdmin's Email
     let cognito = new CognitoIdentityServiceProvider();
-    let emailCompanyAdminFromSignature = await Utils.getUniqueInstance().getEmailFromSignature(event.requestContext.identity.cognitoAuthenticationProvider, cognito);
+    let emailCompanyAdminFromSignature = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
 
     //List of Companies associated to CompanyAdmin's Email
     let dynamo = new DynamoDB.DocumentClient();

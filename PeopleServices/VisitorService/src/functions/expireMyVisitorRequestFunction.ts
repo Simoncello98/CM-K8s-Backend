@@ -25,7 +25,7 @@ export async function expireMyVisitorRequest(event: Request, res: Response) : Pr
 
     //Get Email
     let cognito = new CognitoIdentityServiceProvider();
-    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.requestContext.identity.cognitoAuthenticationProvider, cognito);
+    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
 
     if(visitorRequestToDelete.UserHostEmail !== email) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "You can not delete this request." } }));

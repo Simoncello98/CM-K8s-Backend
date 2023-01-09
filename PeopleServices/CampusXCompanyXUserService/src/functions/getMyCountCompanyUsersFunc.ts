@@ -29,7 +29,7 @@ export async function getMyCountCompanyUsers(event: Request, res: Response) : Pr
 
     //Get email CompanyAdmin
     let cognito = new CognitoIdentityServiceProvider();
-    let emailCompanyAdmin = await Utils.getUniqueInstance().getEmailFromSignature(event.requestContext.identity.cognitoAuthenticationProvider, cognito);
+    let emailCompanyAdmin = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
 
     //Get list of my companies
     let companyAdminItems = await Utils.getUniqueInstance().getMyListOfCompanies(emailCompanyAdmin, requestedCampus.CampusName, dynamo);
