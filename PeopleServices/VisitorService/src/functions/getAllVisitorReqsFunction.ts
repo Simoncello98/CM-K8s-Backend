@@ -22,6 +22,7 @@ export async function getAllVisitorRequest(event: Request, res: Response) : Prom
 
     if (!requestedCampus.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody()));
+        return
     }
 
     //QUERY

@@ -19,6 +19,7 @@ export async function deleteUser(event: Request, res: Response) : Promise<void> 
   let requestedUser: User = deserialize(requestBody, User);
   if (!requestedUser.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUser.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //DELETE

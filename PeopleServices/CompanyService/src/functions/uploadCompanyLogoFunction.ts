@@ -27,6 +27,7 @@ export async function uploadCompanyLogo(event: Request, res: Response) : Promise
 
   if (!newLogo.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newLogo.getReadAndDeleteExpectedBody()));
+    return
   }
 
   newLogo.autoFillUndefinedImportantAttributes();
@@ -36,6 +37,7 @@ export async function uploadCompanyLogo(event: Request, res: Response) : Promise
   let errorContentType = Utils.getUniqueInstance().checkContentType(contentType);
   if (errorContentType != "") {
     res.status(400).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { contentType: contentType, message: errorContentType } }));
+    return
   }
 
   //Build the request for S3

@@ -24,6 +24,7 @@ export async function getAllExpectedVisitorReqs(event: Request, res: Response) :
 
     if (!requestVisitors.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody()));
+        return
     }
 
     requestVisitors.autoFillUndefinedImportantAttributes();
@@ -33,7 +34,7 @@ export async function getAllExpectedVisitorReqs(event: Request, res: Response) :
 
     //Get Email
     let cognito = new CognitoIdentityServiceProvider();
-    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
+    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.get("JWTAuthorization"), cognito);
 
     //QUERY Other VisitorRequests
     let paramsForOtherVisitorRequests = VisitorRequestUtils.paramsForQueryByCampusStatusStartDateAndLimitRecords(requestVisitors.CampusName, VisitorRequestStatus.ACCEPTED, startDate);

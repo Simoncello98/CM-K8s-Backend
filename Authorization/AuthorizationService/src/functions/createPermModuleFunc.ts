@@ -23,6 +23,7 @@ export async function createPermModule(event: Request, res: Response) : Promise<
 
     if (!newPermission.enoughInfoForCreate()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newPermission.getCreateExpectedBody()));
+        return
     }
 
     newPermission.APIMethod = newPermission.APIMethod.toUpperCase();
@@ -40,7 +41,9 @@ export async function createPermModule(event: Request, res: Response) : Promise<
     try {
         const data = await dynamo.put(params).promise();
         res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+        return
     } catch (error) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+        return
     }
 };

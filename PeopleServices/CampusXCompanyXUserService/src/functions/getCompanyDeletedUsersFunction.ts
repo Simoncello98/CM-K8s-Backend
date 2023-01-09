@@ -26,11 +26,12 @@ export async function getCompanyDeletedUsers(event: Request, res: Response) : Pr
 
   if (!requestedCampus.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //GET - email from signature
   let cognito = new CognitoIdentityServiceProvider();
-  let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
+  let email = await Utils.getUniqueInstance().getEmailFromSignature(event.get("JWTAuthorization"), cognito);
 
   //GET - list of Companies
   let dynamo = new DynamoDB.DocumentClient();
@@ -47,9 +48,11 @@ export async function getCompanyDeletedUsers(event: Request, res: Response) : Pr
       listOfUser = listOfUser.concat(data);
     } catch (error) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+      return
     }
 
   }
 
   res.status(200).send(Utils.getUniqueInstance().getDataResponse(listOfUser));
+  return
 };

@@ -26,10 +26,12 @@ export async function updateCampusXCompany(event: Request, res: Response) : Prom
   
   if (!campusXCompanyToUpdate.isPKDefined()) { //if not is PK defined
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, campusXCompanyToUpdate.getUpdateExpectedBody()));
+    return
   }
   
   if (!campusXCompanyToUpdate.enoughInfoForUpdate()) {
     res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, campusXCompanyToUpdate.getUpdateExpectedBody()));
+    return
   }
 
   //UPDATE
@@ -40,8 +42,10 @@ export async function updateCampusXCompany(event: Request, res: Response) : Prom
   try {
     const data = await dynamo.update(params).promise();
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+    return
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+    return
   }
 };
 

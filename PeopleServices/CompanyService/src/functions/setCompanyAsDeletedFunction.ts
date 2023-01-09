@@ -28,7 +28,8 @@ export async function setCompanyAsDeleted(event: Request, res : Response) : Prom
 
   if (!companyToUpdate.isPKDefined()) { //if not is PK defined
     res.status(500).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, companyToUpdate.getReadAndDeleteExpectedBody()));
-  }
+    return  
+    }
 
   companyToUpdate.CompanyStatus = EntityStatus.DELETED;
   let rels = await CompanyConsistentUpdateManager.getUniqueInstance().getRels(companyToUpdate);

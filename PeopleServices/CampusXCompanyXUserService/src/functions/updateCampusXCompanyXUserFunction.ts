@@ -34,10 +34,12 @@ export async function updateCampusXCompanyXUser(event: Request, res: Response) :
 
   if (!campusXCompanyXUserToUpdate.isPKDefined() || !campusXCompanyXUserToUpdate.validValues()) { //if not is PK defined or values are not ok, like for CampusRole a value that is not [Admin-Common]
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, campusXCompanyXUserToUpdate.getUpdateExpectedBody()));
+    return
   }
 
   if (!campusXCompanyXUserToUpdate.enoughInfoForUpdate()) {
     res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, campusXCompanyXUserToUpdate.getUpdateExpectedBody()));
+    return
   }
 
   //remove in case of wrong attribute passed from the client that can destroy db consistence. 
@@ -50,6 +52,7 @@ export async function updateCampusXCompanyXUser(event: Request, res: Response) :
   if (campusXCompanyXUserToUpdate.CampusRole != undefined) data = await transactionUpdate(campusXCompanyXUserToUpdate);
   else data = await updateSingleRecord(campusXCompanyXUserToUpdate);
   res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+  return
 };
 
 

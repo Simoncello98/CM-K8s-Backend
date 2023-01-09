@@ -26,6 +26,7 @@ export async function createUserWithGroup(event: Request, res: Response) : Promi
 
   if (!newUser.enoughInfoForCreate()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newUser.getCreateExpectedBody()));
+    return
   }
 
   //Validate
@@ -48,6 +49,7 @@ export async function createUserWithGroup(event: Request, res: Response) : Promi
     let error = newUser.autoFillEmailWithStandardDomain();
     if (error) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "An error occurred when try to fill standard email." } }, ISRestResultCodes.BadRequest));
+      return
     }
     temporaryPasswordFilled = Resources.DefaultPasswordForNewUsers;
     paramsForCreateUserInCognito = UserServiceUtils.getCognitoParamsWithoutSendingTheEmail(newUser.Email, temporaryPasswordFilled);
@@ -58,6 +60,7 @@ export async function createUserWithGroup(event: Request, res: Response) : Promi
   let errorValidate = UserServiceUtils.validateImportantAttributes(newUser.Email, newUser.SocialNumber);
   if (errorValidate) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: errorValidate }));
+    return
   }
 
   let dynamo = new DynamoDB.DocumentClient();
@@ -99,11 +102,13 @@ export async function createUserWithGroup(event: Request, res: Response) : Promi
   
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, { paramsDisabledUser: paramsDeletedUser }));
+    return
   }
 
   if (newUser.TelephoneNumber) {
     if (!newUser.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
+      return
     }
   }
 
@@ -113,6 +118,7 @@ export async function createUserWithGroup(event: Request, res: Response) : Promi
       await cognito.adminRemoveUserFromGroup(paramsRemoveUserFromGroup).promise();
     } catch (error) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, {paramsRemovewUserFromGroup: paramsRemoveUserFromGroup, message: "Remove User from Group in Cognito encountered an error." }));
+      return
     }
   }
 

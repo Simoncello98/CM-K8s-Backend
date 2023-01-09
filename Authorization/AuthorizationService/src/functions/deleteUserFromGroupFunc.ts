@@ -20,6 +20,7 @@ export async function deleteUserFromGroup(event: Request, res: Response) : Promi
 
     if (!requestedUserXGroup.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUserXGroup.getReadAndDeleteExpectedBody()));
+        return
     }
 
     let cognito = new CognitoIdentityServiceProvider({ signatureVersion: 'v4' });
@@ -29,7 +30,9 @@ export async function deleteUserFromGroup(event: Request, res: Response) : Promi
     try {
         const data = await cognito.adminRemoveUserFromGroup(params).promise();
         res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+        return
     } catch (error) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+        return
     }
 };

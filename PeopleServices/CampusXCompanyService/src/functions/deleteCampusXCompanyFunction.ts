@@ -22,6 +22,7 @@ export async function deleteCampusXCompany(event: Request, res: Response) : Prom
 
   if (!campusXCompanyToDelete.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, campusXCompanyToDelete.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //DELETE
@@ -32,7 +33,9 @@ export async function deleteCampusXCompany(event: Request, res: Response) : Prom
   try {
     const data = await dynamo.delete(params).promise();
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data.Attributes));
+    return
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+    return
   }
 };

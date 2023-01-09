@@ -27,6 +27,7 @@ export async function getCampusCompanyDeletedUsers(event: Request, res: Response
   
   if (!requestedCampusXCompany.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampusXCompany.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //QUERY
@@ -37,7 +38,9 @@ export async function getCampusCompanyDeletedUsers(event: Request, res: Response
   try {
     const data = await dynamo.queryGetAll(params);
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+    return
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+    return
   }
 };

@@ -24,6 +24,7 @@ export async function getAllVisitorReqsByStatus(event: Request, res: Response) :
 
     if (!requestVisitors.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody()));
+        return
     }
 
     //QUERY

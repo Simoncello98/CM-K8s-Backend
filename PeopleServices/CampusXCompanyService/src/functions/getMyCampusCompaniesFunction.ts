@@ -21,11 +21,12 @@ export async function getMyCampusCompanies(event: Request, res: Response) : Prom
 
     if (!requestedCampus.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody()));
+        return
     }
 
     //Get email CompanyAdmin
     let cognito = new CognitoIdentityServiceProvider();
-    let emailCompanyAdmin = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
+    let emailCompanyAdmin = await Utils.getUniqueInstance().getEmailFromSignature(event.get("JWTAuthorization"), cognito);
 
     //Get list of my companies
     let dynamo = new DynamoDB.DocumentClient();
@@ -47,7 +48,9 @@ export async function getMyCampusCompanies(event: Request, res: Response) : Prom
             }
         }
         res.status(200).send(Utils.getUniqueInstance().getDataResponse(listOfRels));
+        return
     } catch (error) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+        return
     }
 };

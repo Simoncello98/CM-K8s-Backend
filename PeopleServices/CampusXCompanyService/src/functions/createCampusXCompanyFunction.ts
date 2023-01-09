@@ -34,6 +34,7 @@ export async function createCampusXCompany(event: Request, res: Response) : Prom
 
   if (!newCampusXCompany.enoughInfoForCreate()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newCampusXCompany.getCreateExpectedBody()));
+    return
   }
 
   let dynamo = new DynamoDB.DocumentClient();
@@ -48,6 +49,7 @@ export async function createCampusXCompany(event: Request, res: Response) : Prom
     }
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, paramsGetRelationship));
+    return
   }
 
   //PUT
@@ -59,7 +61,9 @@ export async function createCampusXCompany(event: Request, res: Response) : Prom
   try {
     const data = await dynamo.put(params).promise();
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+    return
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+    return
   }
 };

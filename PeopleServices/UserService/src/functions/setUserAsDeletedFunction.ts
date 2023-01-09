@@ -25,6 +25,7 @@ export async function setUserAsDeleted(event: Request, res: Response) : Promise<
   let requestedUser: User = deserialize(requestBody, User);
   if (!requestedUser.isPKDefined()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUser.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //TODO: remove all other attributes passed from the client. for the update. THIS IS NOT AN UPDATE OPERATION.

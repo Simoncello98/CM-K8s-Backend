@@ -22,10 +22,12 @@ export async function updateVisitorRequest(event: Request, res: Response) : Prom
 
     if (!visitorRequestToUpdate.isPKDefined()) { //if not is PK defined
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, visitorRequestToUpdate.getUpdateExpectedBody()));
+        return
     }
 
     if (!visitorRequestToUpdate.enoughInfoForUpdate()) {
         res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, visitorRequestToUpdate.getUpdateExpectedBody()));
+        return
     }
 
     //UPDATE

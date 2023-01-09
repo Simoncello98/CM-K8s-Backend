@@ -27,11 +27,12 @@ export async function getMyCampCompUser(event: Request, res: Response) : Promise
 
   if (!requestedCampus.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //GET - email from signature
   let cognito = new CognitoIdentityServiceProvider();
-  let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
+  let email = await Utils.getUniqueInstance().getEmailFromSignature(event.get("JWTAuthorization"), cognito);
 
   //QUERY
   let params = CampusXCompanyXUserServiceUtils.paramsForQueryByCampusAndEmailWithStatus(requestedCampus.CampusName, email, EntityStatus.ACTIVE);
@@ -41,7 +42,9 @@ export async function getMyCampCompUser(event: Request, res: Response) : Promise
   try {
     const data = await dynamo.queryGetAll(params);
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+    return
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+    return
   }
 };

@@ -26,21 +26,24 @@ export async function updateMyCompUsersAndRels(event: Request, res: Response) : 
     let requestedCampusXCompanyXUser: CampusXCompanyXUser = deserialize(requestBody, CampusXCompanyXUser);
     if (!requestedCampusXCompanyXUser.isPKDefined()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampusXCompanyXUser.getUpdateExpectedBody()));
+        return
     }
 
     //Deserialize User 
     let requestedUser: User = deserialize(requestBody, User);
     if (!requestedUser.isPKDefined()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUser.getUpdateExpectedBody()));
+        return
     }
 
     if (!requestedUser.enoughInfoForUpdate()) {
         res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, requestedUser.getUpdateExpectedBody()));
+        return
     }
 
     //Get CompanyAdmin's Email
     let cognito = new CognitoIdentityServiceProvider();
-    let emailCompanyAdminFromSignature = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
+    let emailCompanyAdminFromSignature = await Utils.getUniqueInstance().getEmailFromSignature(event.get("JWTAuthorization"), cognito);
 
     //List of Companies associated to CompanyAdmin's Email
     let dynamo = new DynamoDB.DocumentClient();
@@ -59,6 +62,7 @@ export async function updateMyCompUsersAndRels(event: Request, res: Response) : 
 
     if (!flag) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { message: "You don't have permission to edit other users." }));
+        return
     }
 
 
@@ -74,11 +78,13 @@ export async function updateMyCompUsersAndRels(event: Request, res: Response) : 
 
     if (!flag) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { message: "You don't have permission to edit other users." }));
+        return
     }
 
     if (requestedUser.TelephoneNumber) {
         if (!requestedUser.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
           res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
+          return
         }
       }
 
@@ -105,5 +111,6 @@ export async function updateMyCompUsersAndRels(event: Request, res: Response) : 
     let updateObjects = UserConsistentUpdateManager.getUniqueInstance().getUpdateObjects(rels, requestedUser, false);
     let data = await UserConsistentUpdateManager.getUniqueInstance().transactUpdateRels(updateObjects);
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+    return
 };
 

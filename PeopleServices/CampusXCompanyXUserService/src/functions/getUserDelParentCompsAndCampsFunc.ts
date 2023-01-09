@@ -27,6 +27,7 @@ export async function getUserDelParCompsCamps(event: Request, res: Response) : P
 
   if (!requestedUser.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUser.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //QUERY
@@ -37,7 +38,9 @@ export async function getUserDelParCompsCamps(event: Request, res: Response) : P
   try {
     const data = await dynamo.queryGetAll(params);
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+    return
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+    return
   }
 };

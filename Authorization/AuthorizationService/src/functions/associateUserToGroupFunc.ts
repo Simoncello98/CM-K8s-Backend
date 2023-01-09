@@ -20,6 +20,7 @@ export async function associateUserToGroup(event: Request, res: Response) : Prom
 
     if (!requestedUserXGroup.enoughInfoForCreate()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUserXGroup.getCreateExpectedBody()));
+        return
     }
 
     let cognito = new CognitoIdentityServiceProvider({ signatureVersion: 'v4' });
@@ -29,7 +30,9 @@ export async function associateUserToGroup(event: Request, res: Response) : Prom
     try {
         const data = await cognito.adminAddUserToGroup(params).promise();
         res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+        return
     } catch (error) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+        return
     }
 };

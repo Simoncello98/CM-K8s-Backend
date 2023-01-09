@@ -34,6 +34,7 @@ export async function createCampusXCompanyXUser(event: Request, res: Response) :
 
   if (!newCampusXCompanyXUser.enoughInfoForCreate()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newCampusXCompanyXUser.getCreateExpectedBody()));
+    return
   }
 
   if (newCampusXCompanyXUser.UserSerialID) {
@@ -41,6 +42,7 @@ export async function createCampusXCompanyXUser(event: Request, res: Response) :
       newCampusXCompanyXUser.UserSerialID = newCampusXCompanyXUser.UserSerialID.substring(newCampusXCompanyXUser.UserSerialID.length - 7);
     } else if (newCampusXCompanyXUser.UserSerialID.length < 7) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error : { Message: "UserSerial ID must have 7 characters" }}));
+      return
     }
   }
 
@@ -71,6 +73,7 @@ export async function createCampusXCompanyXUser(event: Request, res: Response) :
       }
     } catch (error) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, { Error: { message: "User does not exist." } }));
+      return
     }
   }
 
@@ -80,8 +83,10 @@ export async function createCampusXCompanyXUser(event: Request, res: Response) :
   try {
     const data = await dynamo.put(params).promise();
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+    return
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+    return
   }
 };
 

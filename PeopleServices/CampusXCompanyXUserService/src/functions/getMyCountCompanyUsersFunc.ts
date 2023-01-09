@@ -23,13 +23,14 @@ export async function getMyCountCompanyUsers(event: Request, res: Response) : Pr
 
     if (!requestedCampus.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody()));
+        return
     }
 
     let dynamo = new DynamoDB.DocumentClient();
 
     //Get email CompanyAdmin
     let cognito = new CognitoIdentityServiceProvider();
-    let emailCompanyAdmin = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
+    let emailCompanyAdmin = await Utils.getUniqueInstance().getEmailFromSignature(event.get("JWTAuthorization"), cognito);
 
     //Get list of my companies
     let companyAdminItems = await Utils.getUniqueInstance().getMyListOfCompanies(emailCompanyAdmin, requestedCampus.CampusName, dynamo);
@@ -63,7 +64,9 @@ export async function getMyCountCompanyUsers(event: Request, res: Response) : Pr
             );
 
         res.status(200).send(Utils.getUniqueInstance().getDataResponse(response));
+        return
     } catch (error) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, requestedCampus));
+        return
     }
 };

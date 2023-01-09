@@ -23,19 +23,23 @@ export async function updateUserTelephoneNumber(event: Request, res: Response) :
   let requestedUser: User = deserialize(requestBody, User);
   if (!requestedUser.isPKDefined()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUser.getUpdateExpectedBody()));
+    return
   }
 
   if (!requestedUser.enoughInfoForUpdate()) {
     res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, requestedUser.getUpdateExpectedBody()));
+    return
   }
 
   if (!requestedUser.TelephoneNumber) {
     res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, requestedUser.TelephoneNumber));
+    return
   }
 
   if (requestedUser.TelephoneNumber) {
     if (!requestedUser.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
+      return
     }
   }
 

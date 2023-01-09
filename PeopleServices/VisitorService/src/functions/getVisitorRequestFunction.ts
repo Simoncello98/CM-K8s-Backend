@@ -20,6 +20,7 @@ export async function getVisitorRequest(event: Request, res: Response) : Promise
 
     if (!requestedVisitor.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedVisitor.getReadAndDeleteExpectedBody()));
+        return
     }
 
     //GET

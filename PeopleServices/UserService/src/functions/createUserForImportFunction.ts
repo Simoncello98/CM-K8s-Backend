@@ -23,6 +23,7 @@ export async function createUserForImport(event: Request, res: Response) : Promi
 
   if (!newUser.enoughInfoForCreate()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newUser.getCreateExpectedBody()));
+    return
   }
 
   //Validate
@@ -32,6 +33,7 @@ export async function createUserForImport(event: Request, res: Response) : Promi
   let errorValidate = UserServiceUtils.validateImportantAttributes(newUser.Email, newUser.SocialNumber);
   if (errorValidate != null) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: errorValidate }));
+    return
   }
 
   let dynamo = new DynamoDB.DocumentClient();
@@ -42,6 +44,7 @@ export async function createUserForImport(event: Request, res: Response) : Promi
   if (newUser.TelephoneNumber) {
     if (!newUser.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
+      return
     }
   }
 

@@ -23,6 +23,7 @@ export async function getAdminAllExpVisitorReqs(event: Request, res: Response) :
 
     if (!requestVisitors.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody()))
+        return
     }
 
     requestVisitors.autoFillUndefinedImportantAttributes();

@@ -25,6 +25,7 @@ export async function getCompanyParentCampuses(event: Request, res: Response) : 
 
   if (!requestedCompany.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCompany.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //QUERY
@@ -35,7 +36,9 @@ export async function getCompanyParentCampuses(event: Request, res: Response) : 
   try {
     const data = await dynamo.query(params).promise();
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data.Items));
+    return
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+    return
   }
 };

@@ -24,11 +24,12 @@ export async function getAllMyVisitorRequests(event: Request, res: Response) : P
 
     if (!requestVisitors.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody()));
+        return
     }
 
     //Get Email
     let cognito = new CognitoIdentityServiceProvider();
-    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
+    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.get("JWTAuthorization"), cognito);
 
     //QUERY
     let params = requestVisitors.VisitorRequestStatus != VisitorRequestStatus.ALL

@@ -34,6 +34,7 @@ export async function createVisitor(event: Request, res: Response) : Promise<voi
 
   if (!newVisitor.enoughInfoForCreate()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newVisitor.getCreateExpectedBody()));
+    return
   }
 
   //Validate
@@ -55,6 +56,7 @@ export async function createVisitor(event: Request, res: Response) : Promise<voi
     let error = newVisitor.autoFillEmailWithStandardDomain();
     if (error) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "An error occurred when try to fill standard email." } }, ISRestResultCodes.BadRequest));
+      return
     }
     temporaryPasswordFilled = Resources.DefaultPasswordForNewUsers;
     paramsForCreateUserInCognito = UserServiceUtils.getCognitoParamsWithoutSendingTheEmail(newVisitor.Email, temporaryPasswordFilled);
@@ -63,12 +65,14 @@ export async function createVisitor(event: Request, res: Response) : Promise<voi
   let errorValidate = UserServiceUtils.validateImportantAttributes(newVisitor.Email, newVisitor.SocialNumber);
   if (errorValidate != null) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: errorValidate }));
+    return
   }
 
   newRelationship.Email = newVisitor.Email;
 
   if (!newRelationship.enoughInfoForCreate()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newRelationship.getCreateExpectedBody()));
+    return
   }
 
   let dynamo = new DynamoDB.DocumentClient();
@@ -87,6 +91,7 @@ export async function createVisitor(event: Request, res: Response) : Promise<voi
     }
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, { paramsDisabledUser: paramsDisabledUser }));
+    return
   }
 
   newVisitor.autoFillUndefinedImportantAttributesForVisitors();
@@ -94,6 +99,7 @@ export async function createVisitor(event: Request, res: Response) : Promise<voi
   if (newVisitor.TelephoneNumber) {
     if (!newVisitor.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
+      return
     }
   }
 

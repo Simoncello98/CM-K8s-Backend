@@ -22,6 +22,7 @@ export async function getByVisitor(event: Request, res: Response) : Promise<void
 
     if (!requestedCampus.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody()));
+        return
     }
 
     //QUERY

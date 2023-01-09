@@ -26,18 +26,13 @@ export async function createMyVisitorRequest(event: Request, res: Response) : Pr
 
     if (!newVisitorRequest.enoughInfoForCreate()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newVisitorRequest.getCreateExpectedBody()));
+        return
     }
 
 
-    //New Specification: employee can create visitor request also for today. 
-    // let today = Utils.getUniqueInstance().getCurrentDateTime().substr(0, StartDateEnum.Today);
-    // if (newVisitorRequest.EstimatedDateOfArrival.substr(0, StartDateEnum.Today) === today) {
-    //     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "You can't create visit requests with today's date." } }, ISRestResultCodes.BadRequest);
-    // }
-
     //Get Host
     let cognito = new CognitoIdentityServiceProvider();
-    let hostEmail = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
+    let hostEmail = await Utils.getUniqueInstance().getEmailFromSignature(event.get("JWTAuthorization"), cognito);
 
     //GET - TelephoneNumber
     const keysHost: DynamoDBKeySchemaInterface = {
@@ -60,11 +55,13 @@ export async function createMyVisitorRequest(event: Request, res: Response) : Pr
         telephoneNumber = data.Item ? data.Item.TelephoneNumber : "";
     } catch (error) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, paramsHost));
+        return
     }
 
     if (telephoneNumber === "" && newVisitorRequest.UserHostTelephoneNumber) {
         if (!newVisitorRequest.UserHostTelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
             res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Userhost Thelephone number!" } }, ISRestResultCodes.BadRequest))
+            return
         } else {
             telephoneNumber = newVisitorRequest.UserHostTelephoneNumber;
         }
@@ -72,11 +69,13 @@ export async function createMyVisitorRequest(event: Request, res: Response) : Pr
 
     if (!telephoneNumber) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { hostEmail: hostEmail, message: "TelephoneNumber is empty." } }))
+        return
     }
 
     if (newVisitorRequest.VisitorTelephoneNumber) {
         if (!newVisitorRequest.VisitorTelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
             res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Visitor Thelephone number!" } }, ISRestResultCodes.BadRequest))
+            return
         }
     }
 

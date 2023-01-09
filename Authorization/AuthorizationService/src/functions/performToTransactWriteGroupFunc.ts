@@ -25,6 +25,7 @@ export async function performToTransactWriteGroup(event: Request, res: Response)
         let functionalityItem: AuthorizedFunctionalities = deserialize(requestBody[i], AuthorizedFunctionalities);
         if (!functionalityItem.enoughInfoForCreate()) {
             res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody[i], functionalityItem.getCreateExpectedBody()));
+            return
         }
         functionalityItem.autoFillUndefinedImportantAttributes();
 
@@ -37,6 +38,7 @@ export async function performToTransactWriteGroup(event: Request, res: Response)
                 await dynamo.transactWrite(params).promise();
             } catch (error) {
                 res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+                return
             }
             itemsToTransact = [];
         }
@@ -48,8 +50,10 @@ export async function performToTransactWriteGroup(event: Request, res: Response)
             await dynamo.transactWrite(params).promise();
         } catch (error) {
             res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+            return
         }
     }
 
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { "NumberOfItems: ": Object.keys(requestBody).length }, ISRestResultCodes.Ok));
+    return
 };

@@ -23,6 +23,7 @@ export async function getCountCompanyUsers(event: Request, res: Response) : Prom
 
     if (!requestedCampus.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody()));
+        return
     }
 
     //QUERY - params
@@ -48,7 +49,9 @@ export async function getCountCompanyUsers(event: Request, res: Response) : Prom
             );
 
         res.status(200).send(Utils.getUniqueInstance().getDataResponse(response));
+        return
     } catch (error) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, paramsGetCampusUsers));
+        return
     }
 };

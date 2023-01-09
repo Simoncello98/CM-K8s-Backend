@@ -13,7 +13,7 @@ import { ISRestResultCodes } from "./Enums/RestResultCodes";
 import { Resources } from "./Resources";
 import { CognitoIdentityServiceProvider, DynamoDB, S3 } from "aws-sdk";
 import { EntityStatus } from "./Statics/EntityStatus";
-import { CognitoJwtVerifier } from "aws-jwt-verify";
+import { CognitoJwtVerifier } from "aws-jwt-verify";
 
 export class Utils {
     private static obj: Utils = null;
@@ -258,17 +258,29 @@ export class Utils {
     }
 
 
-    public async getEmailFromSignature(cognitoAuthenticationProvider: string, cognito: CognitoIdentityServiceProvider): Promise<string> {
-        const sub = cognitoAuthenticationProvider.split(':')[2];
-        const cognitoParams = {
-            UserPoolId: Resources.USERPOOL_ID,
-            Username: sub
-        };
-        //Get Email
+    public async getEmailFromSignature(signature: string, cognito: CognitoIdentityServiceProvider): Promise<string> {
+        if(!signature){
+            console.error("Signature not found");
+            return "Signature not found";
+        }
+        const verifier = CognitoJwtVerifier.create({
+            userPoolId: Resources.USERPOOL_ID,
+            tokenUse: "access",
+            clientId: Resources.USERPOOL_CLIENTID,
+          });
+
         try {
+            const payload = await verifier.verify(signature);
+            let sub = payload.sub
+            const cognitoParams = {
+                UserPoolId: Resources.USERPOOL_ID,
+                Username: sub
+            };
             let cognitoData = await cognito.adminGetUser(cognitoParams).promise();
-            return cognitoData.UserAttributes.find((item) => item.Name == "email").Value;
-        } catch (error) {
+                return cognitoData.UserAttributes.find((item) => item.Name == "email").Value;
+        //Get Email
+        }
+         catch (error) {
             return "" + error;
         }
     }
@@ -278,7 +290,9 @@ export class Utils {
             console.error("Signature not found");
             return "Signature not found";
         }
-        let token = signature.split(",").filter(s => s.startsWith("Signature="))[0].replace("Signature=", "");
+        console.log("-------------")
+        console.log(signature)
+        console.log("-------------")
         const verifier = CognitoJwtVerifier.create({
             userPoolId: Resources.USERPOOL_ID,
             tokenUse: "access",
@@ -286,7 +300,7 @@ export class Utils {
           });
 
         try {
-        const payload = await verifier.verify(token);
+        const payload = await verifier.verify(signature);
         let sub = payload.sub
         const cognitoParams = {
             UserPoolId: Resources.USERPOOL_ID,

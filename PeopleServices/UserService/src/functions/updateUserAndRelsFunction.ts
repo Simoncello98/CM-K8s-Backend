@@ -25,6 +25,7 @@ export async function updateUserAndRels(event: Request, res: Response) : Promise
   let userData: User = deserialize(requestBody, User);
   if (!userData.isPKDefined()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, userData.getUpdateExpectedBody()));
+    return
   }
 
   //Update params
@@ -44,6 +45,7 @@ export async function updateUserAndRels(event: Request, res: Response) : Promise
           await cognito.adminRemoveUserFromGroup(paramsRemoveUserFromGroup).promise();
         } catch (error) {
           res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, paramsRemoveUserFromGroup));
+          return
         }
       }
 
@@ -52,21 +54,25 @@ export async function updateUserAndRels(event: Request, res: Response) : Promise
         await cognito.adminAddUserToGroup(paramsAddUserToGroup).promise();
       } catch (error) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, paramsAddUserToGroup));
+        return
       }
 
     } catch (error) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+      return
     }
   }
 
   //UPDATE
   if (!userData.enoughInfoForUpdate()) {
     res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, userData.getUpdateExpectedBody()));
+    return
   }
 
   if (userData.TelephoneNumber) {
     if (!userData.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
+      return
     }
   }
 

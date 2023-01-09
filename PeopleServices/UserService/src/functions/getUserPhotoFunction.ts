@@ -21,6 +21,7 @@ export async function getUserPhoto(event: Request, res: Response) : Promise<void
 
     if (!requestPhoto.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestPhoto.getReadAndDeleteExpectedBody()));
+        return
     }
 
     //GetSignedurl

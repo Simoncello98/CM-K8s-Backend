@@ -22,6 +22,7 @@ export async function expireMyCompVisitorRequest(event: Request, res: Response) 
 
     if (!visitorRequestToDelete.isPKDefined()) { //if not is PK defined
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, visitorRequestToDelete.getReadAndDeleteExpectedBody()));
+        return
     }
 
     //Get Email
@@ -29,16 +30,18 @@ export async function expireMyCompVisitorRequest(event: Request, res: Response) 
     let dynamo = new DynamoDB.DocumentClient();
     
     //GetSignature
-    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
+    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.get("JWTAuthorization"), cognito);
     let companyList = await Utils.getUniqueInstance().getMyListOfCompanies(email, visitorRequestToDelete.CampusName, dynamo);
     
     if (companyList.length === 0) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "No Auth!" } }, ISRestResultCodes.NoAuth));
+        return
     }
 
     //DELETE
     if (!companyList.find(({CompanyName}) => CompanyName === visitorRequestToDelete.UserHostCompanyName)) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "You cannot expire this request!" } }, ISRestResultCodes.NoAuth));
+        return
     }
 
     visitorRequestToDelete.expireVisitorRequest()

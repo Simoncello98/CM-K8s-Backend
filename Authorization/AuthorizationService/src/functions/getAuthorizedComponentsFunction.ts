@@ -16,21 +16,22 @@ export async function getAuthorizedComponents(event: Request, res: Response) : P
 
     let dynamo = new DynamoDB.DocumentClient();
     let cognito = new CognitoIdentityServiceProvider({ signatureVersion: 'v4' });
-    let groupName = await Utils.getUniqueInstance().getGroupFromSignature(event.headers.authorization, cognito);
+    let groupName = await Utils.getUniqueInstance().getGroupFromSignature(event.get("JWTAuthorization"), cognito);
     console.log("group: " + groupName);
 
     let dynamoParamsForNavigation = AuthorizationServiceUtils.paramsToGetNavigation(groupName, "TREO");
     let dynamoParamsForAPIs = AuthorizationServiceUtils.paramsForQueryByGroupName(groupName);
 
-    console.log("paramsNav: " + dynamoParamsForNavigation);
+    console.log("paramsNav: " + JSON.stringify(dynamoParamsForNavigation));
     //GET
-    console.log("paramsApis: " + dynamoParamsForAPIs);
+    console.log("paramsApis: " + JSON.stringify(dynamoParamsForAPIs));
     
     let dynamoDataGroups: PromiseResult<DynamoDB.DocumentClient.GetItemOutput, AWS.AWSError>;
     try {
         dynamoDataGroups = await dynamo.get(dynamoParamsForNavigation).promise();
     } catch (error) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, dynamoParamsForNavigation));
+        return
     }
 
     console.log("nav res: " + dynamoDataGroups);
@@ -39,6 +40,7 @@ export async function getAuthorizedComponents(event: Request, res: Response) : P
         dynamoDataAPIs = await dynamo.query(dynamoParamsForAPIs).promise();
     } catch (error) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, dynamoParamsForAPIs));
+        return
     }
 
     console.log("apis res: " + dynamoDataAPIs);
@@ -53,4 +55,5 @@ export async function getAuthorizedComponents(event: Request, res: Response) : P
         Functionalities: dynamoDataAPIs.Items ? dynamoDataAPIs.Items : {}
     }
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(response));
+    return
 }

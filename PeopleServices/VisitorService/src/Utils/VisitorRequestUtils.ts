@@ -9,8 +9,8 @@ import { Utils } from "../../../../shared/Utils/Utils";
 import { deserialize } from "typescript-json-serializer";
 import { DynamoDB } from "aws-sdk";
 import { User } from "../../../../shared/Models/User";
-import { UserServiceUtils } from "../../UserService/src/Utils/UserServiceUtils";
 import { VisitorRequestStatus } from "../../../../shared/Utils/Enums/VisitorRequestStatus";
+import { UserServiceUtils } from "../../../UserService/src/Utils/UserServiceUtils";
 
 
 

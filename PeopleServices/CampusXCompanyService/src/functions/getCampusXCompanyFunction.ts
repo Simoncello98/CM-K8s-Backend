@@ -22,6 +22,7 @@ export async function getCampusXCompany(event: Request, res: Response) : Promise
 
   if (!requestedCampusXCompany.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampusXCompany.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //GET
@@ -32,7 +33,9 @@ export async function getCampusXCompany(event: Request, res: Response) : Promise
   try {
     const data = await dynamo.get(params).promise();
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data.Item));
+    return
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+    return
   }
 };

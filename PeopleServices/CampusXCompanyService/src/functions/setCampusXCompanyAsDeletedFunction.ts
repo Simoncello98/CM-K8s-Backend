@@ -25,6 +25,7 @@ export async function setCampusXCompanyAsDeleted(event: Request, res: Response) 
 
   if (!campusXCompanyToUpdate.isPKDefined()) { //if not is PK defined
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, campusXCompanyToUpdate.getReadAndDeleteExpectedBody()));
+    return
   }
 
   campusXCompanyToUpdate.RelationshipStatus = EntityStatus.DELETED;
@@ -44,5 +45,6 @@ export async function setCampusXCompanyAsDeleted(event: Request, res: Response) 
   let data = await CampusXCompanyConsistentUpdateManager.getUniqueInstance().transactUpdateRels(updateObjects);
 
   res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+  return
 };
 

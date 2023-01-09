@@ -21,14 +21,16 @@ export async function expireMyVisitorRequest(event: Request, res: Response) : Pr
 
     if (!visitorRequestToDelete.isPKDefined()) { //if not is PK defined
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, visitorRequestToDelete.getReadAndDeleteExpectedBody()));
+        return
     }
 
     //Get Email
     let cognito = new CognitoIdentityServiceProvider();
-    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
+    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.get("JWTAuthorization"), cognito);
 
     if(visitorRequestToDelete.UserHostEmail !== email) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "You can not delete this request." } }));
+        return
     }
 
     //DELETE

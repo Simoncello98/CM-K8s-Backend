@@ -24,6 +24,7 @@ export async function createVisitorRequest(event: Request, res: Response) : Prom
 
     if (!newVisitorRequest.enoughInfoForCreate()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newVisitorRequest.getCreateExpectedBody()));
+        return
     }
 
     let dynamo = new DynamoDB.DocumentClient();
@@ -48,12 +49,14 @@ export async function createVisitorRequest(event: Request, res: Response) : Prom
     if (newVisitorRequest.UserHostTelephoneNumber) {
         if (!newVisitorRequest.UserHostTelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
             res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Userhost Thelephone number!" } }, ISRestResultCodes.BadRequest))
+            return
         }
     }
 
     if (newVisitorRequest.VisitorTelephoneNumber) {
         if (!newVisitorRequest.VisitorTelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
             res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Visitor Thelephone number!" } }, ISRestResultCodes.BadRequest))
+            return
         }
     }
 

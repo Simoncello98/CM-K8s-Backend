@@ -25,6 +25,7 @@ export async function getCampusXCompanyXUser(event: Request, res: Response) : Pr
 
   if (!requestedCampusXCompanyXUser.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampusXCompanyXUser.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //GET
@@ -35,7 +36,9 @@ export async function getCampusXCompanyXUser(event: Request, res: Response) : Pr
   try {
     const data = await dynamo.get(params).promise();
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data.Item));
+    return
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+    return
   }
 };

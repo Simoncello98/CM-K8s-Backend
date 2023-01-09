@@ -25,6 +25,7 @@ export async function getAllMyCompVisReqsByHost(event: Request, res: Response) :
 
     if (!requestVisitors.enoughInfoForReadOrDelete()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestVisitors.getReadAndDeleteExpectedBody()));
+        return
     }
 
     requestVisitors.autoFillUndefinedImportantAttributes();
@@ -33,11 +34,12 @@ export async function getAllMyCompVisReqsByHost(event: Request, res: Response) :
     let dynamo = new DynamoDB.DocumentClient();
 
     //GetSignature
-    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
+    let email = await Utils.getUniqueInstance().getEmailFromSignature(event.get("JWTAuthorization"), cognito);
     let companyList = await Utils.getUniqueInstance().getMyListOfCompanies(email, requestVisitors.CampusName, dynamo);
 
     if (companyList.length === 0) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "No Auth!" } }, ISRestResultCodes.NoAuth));
+        return
     }
 
     //QUERY

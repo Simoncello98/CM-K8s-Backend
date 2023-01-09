@@ -21,6 +21,7 @@ export async function expireVisitorRequest(event: Request, res: Response) : Prom
 
     if (!visitorRequestToUpdate.isPKDefined()) { //if not is PK defined
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, visitorRequestToUpdate.getReadAndDeleteExpectedBody()));
+        return
     }
 
     //DELETE

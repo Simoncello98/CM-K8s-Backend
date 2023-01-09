@@ -23,6 +23,7 @@ export async function getCampusCompanies(event: Request, res: Response) : Promis
 
   if (!requestedCampus.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampus.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //QUERY
@@ -33,7 +34,9 @@ export async function getCampusCompanies(event: Request, res: Response) : Promis
   try {
     const data = await dynamo.query(params).promise();
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data.Items));
+    return
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+    return
   }
 };

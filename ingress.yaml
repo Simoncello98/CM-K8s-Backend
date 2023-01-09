@@ -26,10 +26,51 @@ spec:
             name: cm-authservice
             port:
               number: 80
-      # - path: /
-      #   pathType: Prefix
-      #   backend:
-      #     service:
-      #       name: cm-campusservice
-      #       port:
-      #         number: 80
+
+
+  - http:
+      paths:
+      - path: /Company
+        pathType: Prefix
+        backend:
+          service:
+            name: cm-companyservice
+            port:
+              number: 80
+  - http:
+      paths:
+      - path: /CampusXCompany
+        pathType: Prefix
+        backend:
+          service:
+            name: cm-campusxcompanyservice
+            port:
+              number: 80
+  - http:
+      paths:
+      - path: /CampusXCompanyXUser
+        pathType: Prefix
+        backend:
+          service:
+            name: cm-campusxcompanyxuserservice
+            port:
+              number: 80
+
+  - http:
+      paths:
+      - path: /User
+        pathType: Prefix
+        backend:
+          service:
+            name: cm-userservice
+            port:
+              number: 80
+  - http:
+      paths:
+      - path: /Visitor
+        pathType: Prefix
+        backend:
+          service:
+            name: cm-visitorservice
+            port:
+              number: 80

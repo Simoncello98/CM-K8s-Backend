@@ -26,6 +26,7 @@ export async function deleteCampusXCompanyXUser(event: Request, res: Response) :
 
   if (!requestedCampusXCompanyXUser.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampusXCompanyXUser.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //DELETE
@@ -36,7 +37,9 @@ export async function deleteCampusXCompanyXUser(event: Request, res: Response) :
   try {
     const data = await dynamo.delete(params).promise();
     res.status(200).send(Utils.getUniqueInstance().getDataResponse(data.Attributes));
+    return
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+    return
   }
 };

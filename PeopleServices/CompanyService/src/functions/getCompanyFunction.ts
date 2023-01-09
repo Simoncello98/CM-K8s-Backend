@@ -22,6 +22,7 @@ export async function getCompany(event: Request, res: Response) : Promise<void> 
 
   if (!requestedCompany.enoughInfoForReadOrDelete()) {
     res.status(500).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCompany.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //GET

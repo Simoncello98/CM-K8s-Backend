@@ -23,26 +23,31 @@ export async function updateMyTelephoneNumber(event: Request, res: Response) : P
   let requestedUser: User = deserialize(requestBody, User);
   if (!requestedUser.isPKDefined()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedUser.getUpdateExpectedBody()));
+    return
   }
 
   //GET - email from signature
   let cognito = new CognitoIdentityServiceProvider();
-  let email = await Utils.getUniqueInstance().getEmailFromSignature(event.headers.authorization, cognito);
+  let email = await Utils.getUniqueInstance().getEmailFromSignature(event.get("JWTAuthorization"), cognito);
   if (email.toLowerCase() !== requestedUser.Email.toLowerCase()) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { cognitoEmail: email, recivedEmail: requestedUser.Email, message: "You don't have permission to edit other users." }, ISRestResultCodes.NoAuth));
+    return
   }
 
   if (!requestedUser.enoughInfoForUpdate()) {
     res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, requestedUser.getUpdateExpectedBody()));
+    return
   }
 
   if (requestedUser.TelephoneNumber === undefined || requestedUser.TelephoneNumber === null) {
     res.status(400).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, requestedUser.TelephoneNumber));
+    return
   }
 
   if (requestedUser.TelephoneNumber) {
     if (!requestedUser.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
+      return
     }
   }
 

@@ -24,6 +24,7 @@ export async function setCampXCompXUsrAsDel(event: Request, res: Response) : Pro
 
   if (!requestedCampusXCompanyXUser.isPKDefined()) { //if not is PK defined
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, requestedCampusXCompanyXUser.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //UPDATE

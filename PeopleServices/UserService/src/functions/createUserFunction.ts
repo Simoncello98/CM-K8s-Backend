@@ -27,6 +27,7 @@ export async function createUser(event: Request, res: Response) : Promise<void> 
 
   if (!newUser.enoughInfoForCreate()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newUser.getCreateExpectedBody()));
+    return
   }
 
   //Validate
@@ -49,6 +50,7 @@ export async function createUser(event: Request, res: Response) : Promise<void> 
     let error = newUser.autoFillEmailWithStandardDomain();
     if (error) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { Message: "An error occurred when try to fill standard email." } }, ISRestResultCodes.BadRequest));
+      return
     }
     temporaryPasswordFilled = Resources.DefaultPasswordForNewUsers;
     paramsForCreateUserInCognito = UserServiceUtils.getCognitoParamsWithoutSendingTheEmail(newUser.Email, temporaryPasswordFilled);
@@ -57,6 +59,7 @@ export async function createUser(event: Request, res: Response) : Promise<void> 
   let errorValidate = UserServiceUtils.validateImportantAttributes(newUser.Email, newUser.SocialNumber);
   if (errorValidate != null) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: errorValidate }));
+    return
   }
 
   let dynamo = new DynamoDB.DocumentClient();
@@ -75,6 +78,7 @@ export async function createUser(event: Request, res: Response) : Promise<void> 
     }
   } catch (error) {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, { paramsDisabledUser: paramsDisabledUser }));
+    return
   }
 
   newUser.autoFillUndefinedImportantAttributes();
@@ -82,6 +86,7 @@ export async function createUser(event: Request, res: Response) : Promise<void> 
   if (newUser.TelephoneNumber) {
     if (!newUser.TelephoneNumber.match(/^\+?(\d\s?)*\d$/g)) {
       res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { message: "Invalid Thelephone number!" } }, ISRestResultCodes.BadRequest))
+      return
     }
   }
 

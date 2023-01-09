@@ -24,6 +24,7 @@ export async function uploadUserPhoto(event: Request, res: Response) : Promise<v
 
   if (!createPhoto.enoughInfoForReadOrDelete()) {
     res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, createPhoto.getReadAndDeleteExpectedBody()));
+    return
   }
 
   //Check ContentType
@@ -31,6 +32,7 @@ export async function uploadUserPhoto(event: Request, res: Response) : Promise<v
   let errorContentType = Utils.getUniqueInstance().checkContentType(contentType);
   if (errorContentType != "") {
     res.status(500).send(Utils.getUniqueInstance().getErrorResponse(null, { Error: { contentType: contentType, message: errorContentType } }));
+    return
   }
 
   //Build the request for S3

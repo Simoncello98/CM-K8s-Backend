@@ -26,7 +26,9 @@ export async function listCognitoGroups(_event: Request, res: Response) : Promis
         }
 
         res.status(200).send(Utils.getUniqueInstance().getDataResponse(listGroupsName));
+        return
     } catch (error) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+        return
     }
 };

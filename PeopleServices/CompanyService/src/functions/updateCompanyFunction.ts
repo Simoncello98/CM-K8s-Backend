@@ -26,10 +26,12 @@ export async function updateCompany(event: Request, res: Response) : Promise<voi
 
   if (!companyToUpdate.isPKDefined()) { //if not is PK defined
     res.status(403).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, companyToUpdate.getUpdateExpectedBody()));
+    return
   }
 
   if (!companyToUpdate.enoughInfoForUpdate()) {
     res.status(403).send(Utils.getUniqueInstance().getNothingToDoErrorResponse(requestBody, companyToUpdate.getUpdateExpectedBody()));
+    return
   }
 
   //UPDATE

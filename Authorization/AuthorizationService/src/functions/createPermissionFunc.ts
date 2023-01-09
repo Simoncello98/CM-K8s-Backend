@@ -20,6 +20,7 @@ export async function createPermissionFunc(event: Request, res: Response) : Prom
 
     if (!newFunctionality.enoughInfoForCreate()) {
         res.status(400).send(Utils.getUniqueInstance().getValidationErrorResponse(requestBody, newFunctionality.getCreateExpectedBody()));
+        return
     }
 
     newFunctionality.APIMethod = newFunctionality.APIMethod.toUpperCase();
@@ -31,7 +32,9 @@ export async function createPermissionFunc(event: Request, res: Response) : Prom
     try {
         const data = await dynamo.put(params).promise();
         res.status(200).send(Utils.getUniqueInstance().getDataResponse(data));
+        return
     } catch (error) {
         res.status(500).send(Utils.getUniqueInstance().getErrorResponse(error, params));
+        return
     }
 };
