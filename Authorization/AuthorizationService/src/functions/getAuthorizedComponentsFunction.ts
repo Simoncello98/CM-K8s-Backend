@@ -13,7 +13,6 @@ import { AuthorizationServiceUtils } from "../Utils/AuthorizationServiceUtils";
 
 
 export async function getAuthorizedComponents(event: Request, res: Response) : Promise<void> {
-
     let dynamo = new DynamoDB.DocumentClient();
     let cognito = new CognitoIdentityServiceProvider({ signatureVersion: 'v4' });
     let groupName = await Utils.getUniqueInstance().getGroupFromSignature(event.get("JWTAuthorization"), cognito);

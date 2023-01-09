@@ -6,5 +6,5 @@
 export interface Response {
     headers: any,
     statusCode: number,
-    body : string
+    body : any
 }

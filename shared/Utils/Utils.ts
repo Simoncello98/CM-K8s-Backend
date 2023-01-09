@@ -31,7 +31,7 @@ export class Utils {
             response.statusCode = ISRestResultCodes.Ok;
             let dataResponse = data as DataErrorInterface;
             if (dataResponse.errorType != undefined) response.body = dataResponse.errorMessage;
-            else response.body = JSON.stringify(data);
+            else response.body = data;
         }
         else response.statusCode = ISRestResultCodes.NotFound;
         return response;
@@ -44,11 +44,11 @@ export class Utils {
 
         var trace: { stack?: any } = {};
         Error.captureStackTrace(trace);
-        response.body = JSON.stringify({
+        response.body = {
             Error: errorBody.toString(),
             Params: params,
             Trace: trace.stack
-        });
+        };
         return response;
     }
 
@@ -84,7 +84,7 @@ export class Utils {
             //TODO you probably need to add : "Access-Control-Allow-Credentials" : true
         };
         response.statusCode = statusCode;
-        response.body = JSON.stringify(body);
+        response.body = body; 
         return response;
     }
 
