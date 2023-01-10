@@ -1,3 +1,15 @@
+# Configure project
+1. run npm i 
+2. execute the step of AWS Backend's readme. 
+3. create a file in "CM-K8S-BACKEND/Shared/" named AWSCredentials.ts
+4. The content must be like this: 
+```
+export class AWSCredentials {
+  static accessKey = <yourAccessKey>
+  static secretKey = <yourSecretKey>
+}
+```
+3. set up k3s user credentials in Shared/AWSCredentials
 # How to deploy
 1. install k3s and k3d utility : curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
 2. create the cluster: k3d cluster create cm -p "80:80@loadbalancer"
