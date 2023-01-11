@@ -19,6 +19,7 @@ import { getUserParentCompsAndCamps } from './functions/getUserParentCompsAndCam
 import { getUserDelParCompsCamps } from './functions/getUserDelParentCompsAndCampsFunc';
 import { getCountCompanyUsers } from './functions/getCountCompanyUsersFunc';
 import { getMyCountCompanyUsers } from './functions/getMyCountCompanyUsersFunc';
+import { Utils } from '../../../shared/Utils/Utils';
 
 configureEnvironment();
 const app = express();
@@ -27,6 +28,15 @@ const port = 80;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+
+app.use((req, res, next) => {
+  let authorized = Utils.getUniqueInstance().isUserAuthorized(req.get("JWTAuthorization"), req.originalUrl, req.method.toUpperCase())
+  if(authorized)
+    next();
+  else{
+    res.status(403).send("Forbidden")
+  }
+})
 
 app.put('/CampusXCompanyXUser', (req, res) => {
   updateCampusXCompanyXUser(req,res);

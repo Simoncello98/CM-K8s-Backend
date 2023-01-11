@@ -13,6 +13,7 @@ import { updateUserTelephoneNumber } from './functions/updateUserTelephoneNumber
 import { updateMyTelephoneNumber } from './functions/updateMyTelephoneNumberFunc';
 import { updateMyCompUsersAndRels } from './functions/updateMyCompUsersAndRelsFunc';
 import { uploadUserPhoto } from './functions/uploadUserPhotoFunction';
+import { Utils } from '../../../shared/Utils/Utils';
 
 configureEnvironment();
 const app = express();
@@ -21,6 +22,15 @@ const port = 80;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+
+app.use((req, res, next) => {
+  let authorized = Utils.getUniqueInstance().isUserAuthorized(req.get("JWTAuthorization"), req.originalUrl, req.method.toUpperCase())
+  if(authorized)
+    next();
+  else{
+    res.status(403).send("Forbidden")
+  }
+})
 
 app.put('/User', (req, res) => {
   updateUserAndRels(req,res);

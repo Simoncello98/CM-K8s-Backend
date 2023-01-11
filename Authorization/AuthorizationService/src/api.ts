@@ -6,6 +6,8 @@ import { getAuthorizedComponents } from './functions/getAuthorizedComponentsFunc
 import { listGroupsFromUser } from './functions/listGroupsFromUserFunc';
 import { associateUserToGroup } from './functions/associateUserToGroupFunc';
 import { listCognitoGroups } from './functions/listCognitoGroupsFunction';
+import { Utils } from '../../../shared/Utils/Utils';
+
 
 configureEnvironment();
 const app = express();
@@ -15,6 +17,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
+app.use((req, res, next) => {
+  let authorized = Utils.getUniqueInstance().isUserAuthorized(req.get("JWTAuthorization"), req.originalUrl, req.method.toUpperCase())
+  if(authorized)
+    next();
+  else{
+    res.status(403).send("Forbidden")
+  }
+})
 
 
 app.get('/Authorization', (req, res) => {

@@ -12,6 +12,7 @@ import { getMyCampusCompanies } from './functions/getMyCampusCompaniesFunction';
 import { getCampusDeletedCompanies } from './functions/getCampusDeletedCompaniesFunction';
 import { getCompanyParentCampuses } from './functions/getCompanyParentCampusesFunction';
 import { getCompanyDelParentCamp } from './functions/getCompanyDeletedParentCampusesFunction';
+import { Utils } from '../../../shared/Utils/Utils';
 
 configureEnvironment();
 const app = express();
@@ -20,6 +21,15 @@ const port = 80;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+
+app.use((req, res, next) => {
+  let authorized = Utils.getUniqueInstance().isUserAuthorized(req.get("JWTAuthorization"), req.originalUrl, req.method.toUpperCase())
+  if(authorized)
+    next();
+  else{
+    res.status(403).send("Forbidden")
+  }
+})
 
 app.put('/CampusXCompany', (req, res) => {
   updateCampusXCompany(req,res);

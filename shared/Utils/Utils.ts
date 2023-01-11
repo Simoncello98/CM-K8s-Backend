@@ -11,7 +11,7 @@ import { DynamoDBKeySchemaInterface } from "./Interfaces/DynamoDBKeySchemaInterf
 import { ModelNecessaryQueryInfoInterface } from "../Models/Interfaces/ModelNecessaryQueryInfoInterface";
 import { ISRestResultCodes } from "./Enums/RestResultCodes";
 import { Resources } from "./Resources";
-import { CognitoIdentityServiceProvider, DynamoDB, S3 } from "aws-sdk";
+import { CognitoIdentityServiceProvider, DynamoDB, IAM, S3 } from "aws-sdk";
 import { EntityStatus } from "./Statics/EntityStatus";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 
@@ -283,14 +283,59 @@ export class Utils {
         }
     }
 
+    public async isUserAuthorized(jwt: string, route: string, method: string) : Promise<boolean> {
+        let path = route.replace(/\?.*$/, '');
+        console.log("method:" + method)
+        console.log("route: " + path);
+        let cognito = new CognitoIdentityServiceProvider({ signatureVersion: 'v4' });
+        const verifier = CognitoJwtVerifier.create({
+            userPoolId: Resources.USERPOOL_ID,
+            tokenUse: "access",
+            clientId: Resources.USERPOOL_CLIENTID,
+          });
+
+        try {
+        const payload = await verifier.verify(jwt);
+        let sub = payload.sub
+        const cognitoParams = {
+            UserPoolId: Resources.USERPOOL_ID,
+            Username: sub
+        };
+        let cognitoData = await cognito.adminListGroupsForUser(cognitoParams).promise();
+        let roleArn = cognitoData.Groups[0].RoleArn;
+        let splitted = roleArn.split("/")
+        let roleName = splitted[splitted.length-1];
+        let iamClient = new IAM()
+        console.log("roleName: " + roleName);
+        const params = {
+            RoleName: roleName
+        };
+        let policyName = (await iamClient.listRolePolicies(params).promise()).PolicyNames[0]; //We know that the architecture suppose only one policy for each role.
+        console.log("policies");
+        console.log(policyName)
+        let policyRes = await iamClient.getRolePolicy({PolicyName: policyName, RoleName: roleName}).promise();
+        let policyString = decodeURIComponent(policyRes.PolicyDocument)
+        console.log(policyString);
+        let policyObj = JSON.parse(policyString);
+        let authorizedApiResources = (policyObj.Statement as Array<any>).filter(s => (s.Action as Array<string>).includes("execute-api:Invoke")).map(s => s.Resource as string)
+        if(authorizedApiResources.map(r => r.endsWith('*'))) 
+            return true; // campus admin has "*" as permission for api calls. 
+        if(authorizedApiResources.filter(r=> r.endsWith(route) && r.includes(method))){
+            return true; //all other specific policy by verb and route
+        }
+        return false;
+
+        } catch(error) {
+            console.error(error);
+            false;
+        }  
+    } 
+
     public async getGroupFromSignature(signature: string, cognito: CognitoIdentityServiceProvider): Promise<string> {
         if(!signature){
             console.error("Signature not found");
             return "Signature not found";
         }
-        console.log("-------------")
-        console.log(signature)
-        console.log("-------------")
         const verifier = CognitoJwtVerifier.create({
             userPoolId: Resources.USERPOOL_ID,
             tokenUse: "access",

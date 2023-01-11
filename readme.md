@@ -55,7 +55,7 @@ kubectl create -f ingress.yaml
 //port forwarding to test:
 kubectl port-forward cm-campusservice-698cbcd58-fmfc2 80:80
 //see logs of the ingress (traefik)
-sudo kubectl --namespace kube-system logs traefik-67987d5d7f-flp67
+sudo kubectl --namespace default logs cm-authservice-5994c86544-cqftv
 
 //restart traefik 
 kubectl scale deployment traefik  --replicas=0 -n kube-system

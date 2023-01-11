@@ -20,10 +20,6 @@ export async function getAuthorizedComponents(event: Request, res: Response) : P
 
     let dynamoParamsForNavigation = AuthorizationServiceUtils.paramsToGetNavigation(groupName, "TREO");
     let dynamoParamsForAPIs = AuthorizationServiceUtils.paramsForQueryByGroupName(groupName);
-
-    console.log("paramsNav: " + JSON.stringify(dynamoParamsForNavigation));
-    //GET
-    console.log("paramsApis: " + JSON.stringify(dynamoParamsForAPIs));
     
     let dynamoDataGroups: PromiseResult<DynamoDB.DocumentClient.GetItemOutput, AWS.AWSError>;
     try {
@@ -33,7 +29,6 @@ export async function getAuthorizedComponents(event: Request, res: Response) : P
         return
     }
 
-    console.log("nav res: " + dynamoDataGroups);
     let dynamoDataAPIs: PromiseResult<DynamoDB.DocumentClient.QueryOutput, AWS.AWSError>;
     try {
         dynamoDataAPIs = await dynamo.query(dynamoParamsForAPIs).promise();
